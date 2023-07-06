@@ -1,12 +1,12 @@
-package story3
+package story4
 
 import "testing"
 
-func TestPrimeNumbers(t *testing.T) {
+func TestOddPrimeNumbers(t *testing.T) {
 	input := []int{1, 2, 3, 4, 5, 6, 7, 8, 9}
-	expectedOutput := []int{2, 3, 5, 7}
+	expectedOutput := []int{3, 5, 7}
 
-	actualOutput := PrimeNumbers(input)
+	actualOutput := OddPrimeNumbers(input)
 
 	if len(actualOutput) != len(expectedOutput) {
 		t.Errorf("Invalid length")
