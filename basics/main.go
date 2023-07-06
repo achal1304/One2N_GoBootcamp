@@ -11,6 +11,8 @@ import (
 	"github.com/achal1304/One2N_GoBootcamp/basics/story2"
 	"github.com/achal1304/One2N_GoBootcamp/basics/story3"
 	"github.com/achal1304/One2N_GoBootcamp/basics/story4"
+	"github.com/achal1304/One2N_GoBootcamp/basics/story5"
+	"github.com/achal1304/One2N_GoBootcamp/basics/story6"
 )
 
 func main() {
@@ -33,6 +35,10 @@ func main() {
 		fmt.Println(story3.PrimeNumbers(takeInput()))
 	case 4:
 		fmt.Println(story4.OddPrimeNumbers(takeInput()))
+	case 5:
+		fmt.Println(story5.EvenAndDivisibleByFive(takeInput()))
+	case 6:
+		fmt.Println(story6.OddMultiplesOfThree(takeInput()))
 	}
 }
 
