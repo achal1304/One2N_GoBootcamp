@@ -44,6 +44,11 @@ func main() {
 	case 7:
 		conditions := []func(int) bool{utils.IsOdd, utils.IsGreaterThanTen, utils.IsPrime}
 		input := []int{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 16, 17, 18, 19}
+		result := story7.MultiConditionsCheck[int](input, utils.All[int], conditions)
+		fmt.Println(result)
+	case 8:
+		conditions := []func(int) bool{utils.IsOdd, utils.IsGreaterThanTen, utils.IsPrime}
+		input := []int{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 16, 17, 18, 19}
 		result := story7.MultiConditionsCheck[int](input, utils.Any[int], conditions)
 		fmt.Println(result)
 	}
