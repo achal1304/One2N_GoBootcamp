@@ -13,6 +13,8 @@ import (
 	"github.com/achal1304/One2N_GoBootcamp/basics/story4"
 	"github.com/achal1304/One2N_GoBootcamp/basics/story5"
 	"github.com/achal1304/One2N_GoBootcamp/basics/story6"
+	"github.com/achal1304/One2N_GoBootcamp/basics/story7"
+	"github.com/achal1304/One2N_GoBootcamp/basics/utils"
 )
 
 func main() {
@@ -39,6 +41,11 @@ func main() {
 		fmt.Println(story5.EvenAndDivisibleByFive(takeInput()))
 	case 6:
 		fmt.Println(story6.OddMultiplesOfThree(takeInput()))
+	case 7:
+		conditions := []func(int) bool{utils.IsOdd, utils.IsGreaterThanTen, utils.IsPrime}
+		input := []int{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 16, 17, 18, 19}
+		result := story7.MultiConditionsCheck[int](input, utils.Any[int], conditions)
+		fmt.Println(result)
 	}
 }
 
