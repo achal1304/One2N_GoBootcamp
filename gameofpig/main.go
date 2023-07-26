@@ -2,7 +2,6 @@ package main
 
 import (
 	"flag"
-	"fmt"
 )
 
 func main() {
@@ -14,5 +13,6 @@ func main() {
 	flag.IntVar(&player2Strategy, "player2", 0, "Player 2 strategy")
 	flag.Parse()
 
-	fmt.Println(player1Strategy, player2Strategy)
+	constantStrategy(player1Strategy, player2Strategy)
+	// fmt.Println(player1Strategy, player2Strategy)
 }
