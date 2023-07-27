@@ -10,7 +10,7 @@ type Player struct {
 	dice     Dice
 }
 
-func constantStrategy(player1Strategy int, player2Strategy int) {
+func constantStrategy(player1Strategy int, player2Strategy int) (int, int, int, int) {
 	player1TotalWins := 0
 	player1 := &Player{
 		name:     "player1",
@@ -44,7 +44,7 @@ func constantStrategy(player1Strategy int, player2Strategy int) {
 			player1TotalWins += 1
 		}
 	}
-	printOutcome(player1Strategy, player2Strategy, player1TotalWins, 10)
+	return player1Strategy, player2Strategy, player1TotalWins, 10
 }
 
 func printOutcome(player1Strategy int, player2Strategy int, player1TotalWins int, totalGames int) {
@@ -56,6 +56,40 @@ func printOutcome(player1Strategy int, player2Strategy int, player1TotalWins int
 		player1Strategy, player2Strategy,
 		player1TotalWins, totalGames, player1WinPercentage,
 		player2TotalWins, totalGames, player2WinPercentage)
+}
+
+func printMultipleGamesAtOnce(player1Strategy int, player1TotalWins int, totalGames int) {
+	player2TotalWins := totalGames - player1TotalWins
+	player1WinPercentage := float32(player1TotalWins) * 100 / float32(totalGames)
+	player2WinPercentage := float32(player2TotalWins) * 100 / float32(totalGames)
+
+	fmt.Printf("Result: Wins, losses staying at k =  %d: %d/%d (%.1f%%), %d/%d (%.1f%%)\n",
+		player1Strategy,
+		player1TotalWins, totalGames, player1WinPercentage,
+		player2TotalWins, totalGames, player2WinPercentage)
+}
+
+func constantAndVariableStrategy(player1Strategy int, player2Strategy int) {
+	for i := 1; i <= 100; i++ {
+		if i == player1Strategy {
+			continue
+		}
+		printOutcome(constantStrategy(player1Strategy, i))
+	}
+}
+
+func variableAndVariableStrategy() {
+	for i := 1; i <= 100; i++ {
+		player1WinsSingleStrategy := 0
+		for j := 1; j <= 100; j++ {
+			if i == j {
+				continue
+			}
+			_, _, player1TotalWins, _ := constantStrategy(i, j)
+			player1WinsSingleStrategy += player1TotalWins
+		}
+		printMultipleGamesAtOnce(i, player1WinsSingleStrategy, 990)
+	}
 }
 
 func strategyOutcome(strategy int, player *Player) int {
