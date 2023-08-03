@@ -1,50 +1,43 @@
 package main
 
-import "fmt"
+import (
+	"fmt"
+)
 
 const goalScore = 100
 
 type Player struct {
-	name     string
-	strategy int
-	dice     Dice
+	name            string
+	minStrategy     int
+	maxStrategy     int
+	currentStrategy int
+	dice            Dice
 }
 
-func constantStrategy(player1Strategy int, player2Strategy int) (int, int, int, int) {
+func constantStrategy(strategy1 *Player, strategy2 *Player) (int, int, int, int) {
 	player1TotalWins := 0
-	player1 := &Player{
-		name:     "player1",
-		strategy: player1Strategy,
-		dice:     Dice{},
-	}
-	player2 := &Player{
-		name:     "player2",
-		strategy: player1Strategy,
-		dice:     Dice{},
-	}
-
 	for i := 0; i < 10; i++ {
-		currentTurn := player1
+		currentTurn := strategy1
 		play1TotalScore := 0
 		play2TotalScore := 0
 
 		for {
-			play1TotalScore += strategyOutcome(player1Strategy, player1)
+			play1TotalScore += strategyOutcome(strategy1)
 			if play1TotalScore >= goalScore {
 				break
 			}
-			currentTurn = player2
-			play2TotalScore += strategyOutcome(player2Strategy, player2)
+			currentTurn = strategy2
+			play2TotalScore += strategyOutcome(strategy2)
 			if play2TotalScore >= goalScore {
 				break
 			}
-			currentTurn = player1
+			currentTurn = strategy1
 		}
-		if player1 == currentTurn {
+		if strategy1 == currentTurn {
 			player1TotalWins += 1
 		}
 	}
-	return player1Strategy, player2Strategy, player1TotalWins, 10
+	return strategy1.currentStrategy, strategy2.currentStrategy, player1TotalWins, 10
 }
 
 func printOutcome(player1Strategy int, player2Strategy int, player1TotalWins int, totalGames int) {
@@ -69,37 +62,52 @@ func printMultipleGamesAtOnce(player1Strategy int, player1TotalWins int, totalGa
 		player2TotalWins, totalGames, player2WinPercentage)
 }
 
-func constantAndVariableStrategy(player1Strategy int, player2Strategy int) {
-	for i := 1; i <= 100; i++ {
-		if i == player1Strategy {
+func constantAndVariableStrategy(player1 *Player, player2 *Player) {
+	var variableStrategy *Player
+	var fixedStrategy *Player
+	if player1.maxStrategy == player1.minStrategy {
+		variableStrategy = player2
+		fixedStrategy = player1
+	} else {
+		variableStrategy = player1
+		fixedStrategy = player2
+	}
+	fixedStrategy.currentStrategy = fixedStrategy.minStrategy
+	for i := variableStrategy.minStrategy; i <= variableStrategy.maxStrategy; i++ {
+		if i == fixedStrategy.currentStrategy {
 			continue
 		}
-		printOutcome(constantStrategy(player1Strategy, i))
+		variableStrategy.currentStrategy = i
+		printOutcome(constantStrategy(fixedStrategy, variableStrategy))
 	}
 }
 
-func variableAndVariableStrategy() {
-	for i := 1; i <= 100; i++ {
+func variableAndVariableStrategy(player1 *Player, player2 *Player) {
+	for i := player1.minStrategy; i <= player1.maxStrategy; i++ {
+		counter := 0
 		player1WinsSingleStrategy := 0
-		for j := 1; j <= 100; j++ {
+		player1.currentStrategy = i
+		for j := player2.minStrategy; j <= player2.maxStrategy; j++ {
 			if i == j {
 				continue
 			}
-			_, _, player1TotalWins, _ := constantStrategy(i, j)
+			player2.currentStrategy = j
+			_, _, player1TotalWins, _ := constantStrategy(player1, player2)
 			player1WinsSingleStrategy += player1TotalWins
+			counter++
 		}
-		printMultipleGamesAtOnce(i, player1WinsSingleStrategy, 990)
+		printMultipleGamesAtOnce(i, player1WinsSingleStrategy, (counter)*10)
 	}
 }
 
-func strategyOutcome(strategy int, player *Player) int {
+func strategyOutcome(player *Player) int {
 	currentScore := 0
 	for {
 		number := player.dice.Roll()
 		if number == 1 {
 			return 0
 		}
-		if currentScore+number >= strategy {
+		if currentScore+number >= player.currentStrategy {
 			return currentScore + number
 		}
 		currentScore += number
