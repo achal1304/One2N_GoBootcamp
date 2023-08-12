@@ -11,7 +11,7 @@ type Player struct {
 	minStrategy     int
 	maxStrategy     int
 	currentStrategy int
-	dice            Dice
+	dice            DiceRandom
 }
 
 func constantStrategy(strategy1 *Player, strategy2 *Player) (int, int, int, int) {

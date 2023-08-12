@@ -8,9 +8,14 @@ import (
 // 	rand.Seed(time.Now().UnixNano())
 // }
 
+type DiceRandom interface {
+	Roll() int
+}
+
 type Dice struct {
+	rng *rand.Rand
 }
 
 func (d Dice) Roll() int {
-	return rand.Intn(6) + 1
+	return d.rng.Intn(6) + 1
 }
