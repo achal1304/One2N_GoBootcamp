@@ -69,7 +69,7 @@ func main() {
 	if strategyMin1 == strategyMax1 && strategyMin2 == strategyMax2 {
 		player1.currentStrategy = player1.minStrategy
 		player2.currentStrategy = player2.minStrategy
-		printOutcome(constantStrategy(player1, player2))
+		PrintOutcome(constantStrategy(player1, player2))
 	} else if strategyMin1 != strategyMax1 && strategyMin2 != strategyMax2 {
 		variableAndVariableStrategy(player1, player2)
 	} else {

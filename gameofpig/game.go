@@ -1,9 +1,5 @@
 package main
 
-import (
-	"fmt"
-)
-
 const goalScore = 100
 
 type Player struct {
@@ -40,28 +36,6 @@ func constantStrategy(strategy1 *Player, strategy2 *Player) (int, int, int, int)
 	return strategy1.currentStrategy, strategy2.currentStrategy, player1TotalWins, 10
 }
 
-func printOutcome(player1Strategy int, player2Strategy int, player1TotalWins int, totalGames int) {
-	player2TotalWins := totalGames - player1TotalWins
-	player1WinPercentage := float32(player1TotalWins) * 100 / float32(totalGames)
-	player2WinPercentage := float32(player2TotalWins) * 100 / float32(totalGames)
-
-	fmt.Printf("Holding at %d vs Holding at %d wins: %d/%d (%.1f%%), losses: %d/%d (%.1f%%)\n",
-		player1Strategy, player2Strategy,
-		player1TotalWins, totalGames, player1WinPercentage,
-		player2TotalWins, totalGames, player2WinPercentage)
-}
-
-func printMultipleGamesAtOnce(player1Strategy int, player1TotalWins int, totalGames int) {
-	player2TotalWins := totalGames - player1TotalWins
-	player1WinPercentage := float32(player1TotalWins) * 100 / float32(totalGames)
-	player2WinPercentage := float32(player2TotalWins) * 100 / float32(totalGames)
-
-	fmt.Printf("Result: Wins, losses staying at k =  %d: %d/%d (%.1f%%), %d/%d (%.1f%%)\n",
-		player1Strategy,
-		player1TotalWins, totalGames, player1WinPercentage,
-		player2TotalWins, totalGames, player2WinPercentage)
-}
-
 func constantAndVariableStrategy(player1 *Player, player2 *Player) {
 	var variableStrategy *Player
 	var fixedStrategy *Player
@@ -78,7 +52,7 @@ func constantAndVariableStrategy(player1 *Player, player2 *Player) {
 			continue
 		}
 		variableStrategy.currentStrategy = i
-		printOutcome(constantStrategy(fixedStrategy, variableStrategy))
+		PrintOutcome(constantStrategy(fixedStrategy, variableStrategy))
 	}
 }
 
@@ -96,7 +70,7 @@ func variableAndVariableStrategy(player1 *Player, player2 *Player) {
 			player1WinsSingleStrategy += player1TotalWins
 			counter++
 		}
-		printMultipleGamesAtOnce(i, player1WinsSingleStrategy, (counter)*10)
+		PrintMultipleGamesAtOnce(i, player1WinsSingleStrategy, (counter)*10)
 	}
 }
 
