@@ -3,8 +3,10 @@ package main
 import (
 	"flag"
 	"fmt"
+	"math/rand"
 	"strconv"
 	"strings"
+	"time"
 )
 
 func parseRange(value string) (int, int, error) {
@@ -58,13 +60,13 @@ func main() {
 		name:        "player1",
 		minStrategy: strategyMin1,
 		maxStrategy: strategyMax1,
-		dice:        Dice{},
+		dice:        Dice{rng: rand.New(rand.NewSource(time.Now().UnixNano()))},
 	}
 	player2 := &Player{
 		name:        "player2",
 		minStrategy: strategyMin2,
 		maxStrategy: strategyMax2,
-		dice:        Dice{},
+		dice:        Dice{rng: rand.New(rand.NewSource(time.Now().UnixNano()))},
 	}
 	if strategyMin1 == strategyMax1 && strategyMin2 == strategyMax2 {
 		player1.currentStrategy = player1.minStrategy

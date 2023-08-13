@@ -4,10 +4,6 @@ import (
 	"math/rand"
 )
 
-// func init() {
-// 	rand.Seed(time.Now().UnixNano())
-// }
-
 type DiceRandom interface {
 	Roll() int
 }
