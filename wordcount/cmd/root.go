@@ -48,6 +48,7 @@ func init() {
 	flagsOptions = contract.NewFlags()
 	rootCmd.Flags().BoolVarP(&flagsOptions.LineCount, "lines", "l", false, "count lines in the file")
 	rootCmd.Flags().BoolVarP(&flagsOptions.WordCount, "word", "w", false, "count words in the file")
+	rootCmd.Flags().BoolVarP(&flagsOptions.CharacterCount, "character", "c", false, "count characters in the file")
 
 	// Here you will define your flags and configuration settings.
 	// Cobra supports persistent flags, which, if defined here,

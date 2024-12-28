@@ -24,7 +24,7 @@ func TestGenerateOutput(t *testing.T) {
 			wcFlags: contract.WcFlags{
 				LineCount: true,
 			},
-			expected: "      10 file1.txt",
+			expected: "      10 file1.txt\n",
 		},
 		{
 			name: "Only Word Count",
@@ -35,7 +35,7 @@ func TestGenerateOutput(t *testing.T) {
 			wcFlags: contract.WcFlags{
 				WordCount: true,
 			},
-			expected: "      20 file2.txt",
+			expected: "      20 file2.txt\n",
 		},
 		{
 			name: "Only Character Count",
@@ -46,7 +46,7 @@ func TestGenerateOutput(t *testing.T) {
 			wcFlags: contract.WcFlags{
 				CharacterCount: true,
 			},
-			expected: "      20 file2.txt",
+			expected: "      20 file2.txt\n",
 		},
 		{
 			name: "Line and Word Count",
@@ -59,7 +59,7 @@ func TestGenerateOutput(t *testing.T) {
 				LineCount: true,
 				WordCount: true,
 			},
-			expected: "      15      25 file3.txt",
+			expected: "      15      25 file3.txt\n",
 		},
 		{
 			name: "Line Word And Character Count",
@@ -70,7 +70,7 @@ func TestGenerateOutput(t *testing.T) {
 				FileName:       "file3.txt",
 			},
 			wcFlags:  contract.WcFlags{},
-			expected: "      15      25      50 file3.txt",
+			expected: "      15      25      50 file3.txt\n",
 		},
 		{
 			name: "No Flags And No Counts",
@@ -78,7 +78,7 @@ func TestGenerateOutput(t *testing.T) {
 				FileName: "file4.txt",
 			},
 			wcFlags:  contract.WcFlags{},
-			expected: "       0       0       0 file4.txt",
+			expected: "       0       0       0 file4.txt\n",
 		},
 	}
 

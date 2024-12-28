@@ -21,12 +21,12 @@ func GenerateOutput(wcValues contract.WcValues, wcFlags contract.WcFlags) string
 		if wcFlags.CharacterCount {
 			output += fmt.Sprintf("%8d", wcValues.CharacterCount)
 		}
-		output += fmt.Sprintf(" %s", wcValues.FileName)
+		output += fmt.Sprintf(" %s\n", wcValues.FileName)
 	} else {
 		output += fmt.Sprintf("%8d", wcValues.LineCount)
 		output += fmt.Sprintf("%8d", wcValues.WordCount)
 		output += fmt.Sprintf("%8d", wcValues.CharacterCount)
-		output += fmt.Sprintf(" %s", wcValues.FileName)
+		output += fmt.Sprintf(" %s\n", wcValues.FileName)
 	}
 
 	return output
