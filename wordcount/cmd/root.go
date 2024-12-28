@@ -4,20 +4,16 @@ Copyright © 2024 NAME HERE <EMAIL ADDRESS>
 package cmd
 
 import (
-	"fmt"
 	"os"
 
+	"github.com/achal1304/One2N_GoBootcamp/wordcount/contract"
 	"github.com/achal1304/One2N_GoBootcamp/wordcount/wcerrors"
 	"github.com/achal1304/One2N_GoBootcamp/wordcount/wchandler"
 	"github.com/spf13/cobra"
 )
 
-type WcFlags struct {
-	lineCount bool
-}
-
 var (
-	flagsOptions WcFlags
+	flagsOptions = contract.WcFlags{}
 )
 
 // rootCmd represents the base command when called without any subcommands
@@ -27,16 +23,13 @@ var rootCmd = &cobra.Command{
 	Args:  cobra.ExactArgs(1), // Ensure exactly one file is provided
 	RunE: func(cmd *cobra.Command, args []string) error {
 		fileName := args[0]
-
 		// Process file based on the flags
-		if flagsOptions.lineCount {
-			count, err := wchandler.ProcessWCCommand(fileName)
-			if err != nil {
-				return wcerrors.HandleErrors(err, fileName)
-			}
-
-			fmt.Printf("%8d %s\n", count, fileName)
+		wcValues, err := wchandler.ProcessWCCommand(fileName, flagsOptions)
+		if err != nil {
+			return wcerrors.HandleErrors(err, fileName)
 		}
+
+		wchandler.PrintStdOut(wchandler.GenerateOutput(wcValues, flagsOptions))
 		return nil
 	},
 }
@@ -52,7 +45,9 @@ func Execute() {
 
 func init() {
 	rootCmd.SilenceUsage = true
-	rootCmd.Flags().BoolVarP(&flagsOptions.lineCount, "lines", "l", false, "count lines in the file")
+	flagsOptions = contract.NewFlags()
+	rootCmd.Flags().BoolVarP(&flagsOptions.LineCount, "lines", "l", false, "count lines in the file")
+	rootCmd.Flags().BoolVarP(&flagsOptions.WordCount, "word", "w", false, "count words in the file")
 
 	// Here you will define your flags and configuration settings.
 	// Cobra supports persistent flags, which, if defined here,
