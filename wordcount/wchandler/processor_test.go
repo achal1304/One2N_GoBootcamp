@@ -25,7 +25,7 @@ func TestProcessWCCommand(t *testing.T) {
 				lines := "line1\nline2"
 				return os.WriteFile(fileName, []byte(lines), 0644)
 			},
-			expectedValues: contract.WcValues{LineCount: 2, WordCount: 2},
+			expectedValues: contract.WcValues{LineCount: 2, WordCount: 2, CharacterCount: 11},
 			setFlags:       contract.WcFlags{LineCount: true},
 			expectedErr:    nil,
 		},
@@ -36,7 +36,7 @@ func TestProcessWCCommand(t *testing.T) {
 				lines := "            \n             \n   "
 				return os.WriteFile(fileName, []byte(lines), 0644)
 			},
-			expectedValues: contract.WcValues{LineCount: 3, WordCount: 0},
+			expectedValues: contract.WcValues{LineCount: 3, WordCount: 0, CharacterCount: 30},
 			setFlags:       contract.WcFlags{LineCount: true},
 			expectedErr:    nil,
 		},
@@ -47,7 +47,7 @@ func TestProcessWCCommand(t *testing.T) {
 				lines := "line1-line1new\nline2"
 				return os.WriteFile(fileName, []byte(lines), 0644)
 			},
-			expectedValues: contract.WcValues{WordCount: 2, LineCount: 2},
+			expectedValues: contract.WcValues{WordCount: 2, LineCount: 2, CharacterCount: 20},
 			setFlags:       contract.WcFlags{WordCount: true},
 			expectedErr:    nil,
 		},
@@ -58,7 +58,7 @@ func TestProcessWCCommand(t *testing.T) {
 				lines := "                                              "
 				return os.WriteFile(fileName, []byte(lines), 0644)
 			},
-			expectedValues: contract.WcValues{WordCount: 0, LineCount: 1},
+			expectedValues: contract.WcValues{WordCount: 0, LineCount: 1, CharacterCount: 46},
 			setFlags:       contract.WcFlags{WordCount: true},
 			expectedErr:    nil,
 		},
@@ -83,7 +83,7 @@ func TestProcessWCCommand(t *testing.T) {
 				}
 				return nil
 			},
-			expectedValues: contract.WcValues{LineCount: 2, WordCount: 4},
+			expectedValues: contract.WcValues{LineCount: 2, WordCount: 4, CharacterCount: 14},
 			setFlags:       contract.WcFlags{LineCount: true},
 		},
 	}

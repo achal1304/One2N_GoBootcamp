@@ -29,7 +29,7 @@ var rootCmd = &cobra.Command{
 			return wcerrors.HandleErrors(err, fileName)
 		}
 
-		wchandler.PrintStdOut(wchandler.GenerateOutput(wcValues, flagsOptions))
+		wchandler.PrintStdOut(os.Stdout, wchandler.GenerateOutput(wcValues, flagsOptions))
 		return nil
 	},
 }

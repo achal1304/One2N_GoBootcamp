@@ -24,6 +24,11 @@ func ProcessWCCommand(fileName string, wcFlags contract.WcFlags) (contract.WcVal
 		words := strings.Fields(lines)
 		wcCounterValues.WordCount += len(words)
 	}
+	fileStats, err := file.Stat()
+	if err != nil {
+		return wcCounterValues, fmt.Errorf("error reading file stats: %v", err)
+	}
+	wcCounterValues.CharacterCount = int(fileStats.Size())
 
 	if err := scanner.Err(); err != nil {
 		return wcCounterValues, fmt.Errorf("error reading file: %v", err)
