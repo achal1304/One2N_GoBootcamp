@@ -1,0 +1,3 @@
+.PHONY:	testwc
+testwc:
+	go test ./wordcount/...
