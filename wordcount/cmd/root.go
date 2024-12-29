@@ -5,9 +5,9 @@ package cmd
 
 import (
 	"os"
+	"sync"
 
 	"github.com/achal1304/One2N_GoBootcamp/wordcount/contract"
-	"github.com/achal1304/One2N_GoBootcamp/wordcount/wcerrors"
 	"github.com/achal1304/One2N_GoBootcamp/wordcount/wchandler"
 	"github.com/spf13/cobra"
 )
@@ -16,20 +16,44 @@ var (
 	flagsOptions = contract.WcFlags{}
 )
 
+const MaxFiles = 10
+
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
 	Use:   "wc [flags] [file]",
 	Short: "Perform word count operations",
-	Args:  cobra.ExactArgs(1), // Ensure exactly one file is provided
+	Args:  cobra.MaximumNArgs(MaxFiles), // Ensure exactly one file is provided
 	RunE: func(cmd *cobra.Command, args []string) error {
-		fileName := args[0]
+		// fileName := args[0]
 		// Process file based on the flags
-		wcValues, err := wchandler.ProcessWCCommand(fileName, flagsOptions)
-		if err != nil {
-			return wcerrors.HandleErrors(err, fileName)
+		total := contract.WcValues{FileName: "total"}
+		wcValuesCh := make(chan contract.WcValues)
+		exitCode := make(chan int)
+		defer close(exitCode)
+
+		done := make(chan struct{})
+		var wg sync.WaitGroup
+		for _, arg := range args {
+			wg.Add(1)
+			go wchandler.ProcessWCCommand(&wg, arg, flagsOptions, wcValuesCh)
 		}
 
-		wchandler.PrintStdOut(os.Stdout, wchandler.GenerateOutput(wcValues, flagsOptions))
+		go func() {
+			exitStatusCode := wchandler.ComputeTotalCount(len(args) > 1, wcValuesCh, flagsOptions, &total, done, os.Stdout)
+			exitCode <- exitStatusCode
+		}()
+
+		wg.Wait()
+		close(wcValuesCh)
+		<-done
+		exitCodeValue := <-exitCode
+		if exitCodeValue != 0 {
+			os.Exit(exitCodeValue)
+		}
+		if len(args) > 1 {
+			wchandler.PrintStdOut(os.Stdout, wchandler.GenerateOutput(total, flagsOptions))
+		}
+
 		return nil
 	},
 }

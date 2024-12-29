@@ -6,12 +6,26 @@ import (
 	"os"
 )
 
-func HandleErrors(errorMessage error, fileName string) error {
-	if errors.Is(errorMessage, os.ErrNotExist) {
-		return fmt.Errorf("wc: %s: read: %s", fileName, "No such file or directory")
-	} else if errors.Is(errorMessage, os.ErrPermission) {
-		return fmt.Errorf("wc: %s: read: %s", fileName, "Permission denied")
+type WcError struct {
+	Err      error
+	FileName string
+}
+
+func HandleErrors(wcError WcError) WcError {
+	if errors.Is(wcError.Err, os.ErrNotExist) {
+		return WcError{
+			Err:      fmt.Errorf("wc: %s: read: %s", wcError.FileName, "No such file or directory\n"),
+			FileName: wcError.FileName,
+		}
+	} else if errors.Is(wcError.Err, os.ErrPermission) {
+		return WcError{
+			Err:      fmt.Errorf("wc: %s: read: %s", wcError.FileName, "Permission denied\n"),
+			FileName: wcError.FileName,
+		}
 	} else {
-		return fmt.Errorf("wc: %s", errorMessage.Error())
+		return WcError{
+			Err:      fmt.Errorf("wc: %s\n", wcError.Err.Error()),
+			FileName: wcError.FileName,
+		}
 	}
 }
