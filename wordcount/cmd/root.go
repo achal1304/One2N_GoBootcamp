@@ -24,6 +24,8 @@ var rootCmd = &cobra.Command{
 	Short: "Perform word count operations",
 	Args:  cobra.MaximumNArgs(MaxFiles), // Ensure exactly one file is provided
 	RunE: func(cmd *cobra.Command, args []string) error {
+
+		// Sample command - All_Well_hat_Ends_Well.txt Antony_tony_and_Cleopatra.txt Midsummer_Night_Dream.txt The_Tempest.txt
 		// fileName := args[0]
 		// Process file based on the flags
 		if len(args) == 0 {

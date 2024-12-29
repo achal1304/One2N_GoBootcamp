@@ -30,18 +30,18 @@ func TestProcessWCCommand(t *testing.T) {
 			prepare: func(fileName string, lines string) error {
 				return os.WriteFile(fileName, []byte(lines), 0644)
 			},
-			expectedValues: contract.WcValues{LineCount: 2, WordCount: 2, CharacterCount: 11},
+			expectedValues: contract.WcValues{LineCount: 1, WordCount: 2, CharacterCount: 11},
 			setFlags:       contract.WcFlags{LineCount: true},
 			expectedErr:    nil,
 		},
 		{
 			name:       "HappyPathLineCountStdIn",
 			fileName:   "",
-			inputLines: "line1-line1new\nline2new",
+			inputLines: "line1-line1new\nline2new\n",
 			prepare: func(fileName string, lines string) error {
 				return nil
 			},
-			expectedValues: contract.WcValues{WordCount: 2, LineCount: 2, CharacterCount: 24},
+			expectedValues: contract.WcValues{LineCount: 2, WordCount: 2, CharacterCount: 24},
 			setFlags:       contract.WcFlags{LineCount: true},
 			expectedErr:    nil,
 		},
@@ -52,7 +52,7 @@ func TestProcessWCCommand(t *testing.T) {
 			prepare: func(fileName string, lines string) error {
 				return os.WriteFile(fileName, []byte(lines), 0644)
 			},
-			expectedValues: contract.WcValues{LineCount: 3, WordCount: 0, CharacterCount: 30},
+			expectedValues: contract.WcValues{LineCount: 2, WordCount: 0, CharacterCount: 30},
 			setFlags:       contract.WcFlags{LineCount: true},
 			expectedErr:    nil,
 		},
@@ -63,7 +63,7 @@ func TestProcessWCCommand(t *testing.T) {
 			prepare: func(fileName string, lines string) error {
 				return os.WriteFile(fileName, []byte(lines), 0644)
 			},
-			expectedValues: contract.WcValues{WordCount: 2, LineCount: 2, CharacterCount: 20},
+			expectedValues: contract.WcValues{LineCount: 1, WordCount: 2, CharacterCount: 20},
 			setFlags:       contract.WcFlags{WordCount: true},
 			expectedErr:    nil,
 		},
@@ -74,7 +74,7 @@ func TestProcessWCCommand(t *testing.T) {
 			prepare: func(fileName string, lines string) error {
 				return os.WriteFile(fileName, []byte(lines), 0644)
 			},
-			expectedValues: contract.WcValues{WordCount: 0, LineCount: 1, CharacterCount: 46},
+			expectedValues: contract.WcValues{LineCount: 0, WordCount: 0, CharacterCount: 46},
 			setFlags:       contract.WcFlags{WordCount: true},
 			expectedErr:    nil,
 		},
