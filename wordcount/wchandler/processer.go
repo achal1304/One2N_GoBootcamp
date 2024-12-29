@@ -12,44 +12,57 @@ import (
 	"github.com/achal1304/One2N_GoBootcamp/wordcount/wcerrors"
 )
 
-func ProcessWCCommand(wg *sync.WaitGroup, fileName string, wcFlags contract.WcFlags, wcValuesCh chan contract.WcValues) {
+func ProcessWCCommand(wg *sync.WaitGroup,
+	fileName string,
+	wcFlags contract.WcFlags,
+	wcValuesCh chan contract.WcValues,
+	reader io.Reader) {
 	defer wg.Done()
-	fileInfo, err := os.Stat(fileName)
+	var scanner *bufio.Scanner
 	wcCounterValues := contract.WcValues{FileName: fileName}
-	if err != nil {
-		wcCounterValues.Err = &wcerrors.WcError{Err: err, FileName: fileName}
-		wcValuesCh <- wcCounterValues
-		return
+	if fileName != "" {
+		fileInfo, err := os.Stat(fileName)
+		if err != nil {
+			wcCounterValues.Err = &wcerrors.WcError{Err: err, FileName: fileName}
+			wcValuesCh <- wcCounterValues
+			return
+		}
+
+		if fileInfo.IsDir() {
+			wcCounterValues.Err = &wcerrors.WcError{Err: fmt.Errorf("%s: Is a directory", fileName), FileName: fileName}
+			wcValuesCh <- wcCounterValues
+			return
+		}
+
+		file, err := os.Open(fileName)
+		if err != nil {
+			wcCounterValues.Err = &wcerrors.WcError{Err: err, FileName: fileName}
+			wcValuesCh <- wcCounterValues
+			return
+		}
+		defer file.Close()
+
+		fileStats, err := file.Stat()
+		if err != nil {
+			wcCounterValues.Err = &wcerrors.WcError{Err: fmt.Errorf("error reading file stats: %v", err), FileName: fileName}
+			wcValuesCh <- wcCounterValues
+			return
+		}
+		wcCounterValues.CharacterCount = int(fileStats.Size())
+		scanner = bufio.NewScanner(file)
+	} else {
+		scanner = bufio.NewScanner(reader)
 	}
 
-	if fileInfo.IsDir() {
-		wcCounterValues.Err = &wcerrors.WcError{Err: fmt.Errorf("%s: Is a directory", fileName), FileName: fileName}
-		wcValuesCh <- wcCounterValues
-		return
-	}
-
-	file, err := os.Open(fileName)
-	if err != nil {
-		wcCounterValues.Err = &wcerrors.WcError{Err: err, FileName: fileName}
-		wcValuesCh <- wcCounterValues
-		return
-	}
-	defer file.Close()
-
-	scanner := bufio.NewScanner(file)
 	for scanner.Scan() {
 		lines := scanner.Text()
 		wcCounterValues.LineCount++
 		words := strings.Fields(lines)
 		wcCounterValues.WordCount += len(words)
+		if fileName == "" {
+			wcCounterValues.CharacterCount += len(lines) + 1
+		}
 	}
-	fileStats, err := file.Stat()
-	if err != nil {
-		wcCounterValues.Err = &wcerrors.WcError{Err: fmt.Errorf("error reading file stats: %v", err), FileName: fileName}
-		wcValuesCh <- wcCounterValues
-		return
-	}
-	wcCounterValues.CharacterCount = int(fileStats.Size())
 
 	if err := scanner.Err(); err != nil {
 		wcCounterValues.Err = &wcerrors.WcError{Err: fmt.Errorf("error reading file: %v %T", err, err), FileName: fileName}

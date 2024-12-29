@@ -17,16 +17,17 @@ func TestProcessWCCommand(t *testing.T) {
 	tests := []struct {
 		name           string
 		fileName       string
-		prepare        func(fileName string) error
+		prepare        func(fileName string, lines string) error
+		inputLines     string
 		expectedValues contract.WcValues
 		setFlags       contract.WcFlags
 		expectedErr    error
 	}{
 		{
-			name:     "HappyPathLineCount",
-			fileName: "happyline.txt",
-			prepare: func(fileName string) error {
-				lines := "line1\nline2"
+			name:       "HappyPathLineCount",
+			fileName:   "happyline.txt",
+			inputLines: "line1\nline2",
+			prepare: func(fileName string, lines string) error {
 				return os.WriteFile(fileName, []byte(lines), 0644)
 			},
 			expectedValues: contract.WcValues{LineCount: 2, WordCount: 2, CharacterCount: 11},
@@ -34,10 +35,21 @@ func TestProcessWCCommand(t *testing.T) {
 			expectedErr:    nil,
 		},
 		{
-			name:     "HappyPathLineWhiteSpacesCount",
-			fileName: "happyline.txt",
-			prepare: func(fileName string) error {
-				lines := "            \n             \n   "
+			name:       "HappyPathLineCountStdIn",
+			fileName:   "",
+			inputLines: "line1-line1new\nline2new",
+			prepare: func(fileName string, lines string) error {
+				return nil
+			},
+			expectedValues: contract.WcValues{WordCount: 2, LineCount: 2, CharacterCount: 24},
+			setFlags:       contract.WcFlags{LineCount: true},
+			expectedErr:    nil,
+		},
+		{
+			name:       "HappyPathLineWhiteSpacesCount",
+			fileName:   "happyline.txt",
+			inputLines: "            \n             \n   ",
+			prepare: func(fileName string, lines string) error {
 				return os.WriteFile(fileName, []byte(lines), 0644)
 			},
 			expectedValues: contract.WcValues{LineCount: 3, WordCount: 0, CharacterCount: 30},
@@ -45,10 +57,10 @@ func TestProcessWCCommand(t *testing.T) {
 			expectedErr:    nil,
 		},
 		{
-			name:     "HappyPathWordCount",
-			fileName: "happyword.txt",
-			prepare: func(fileName string) error {
-				lines := "line1-line1new\nline2"
+			name:       "HappyPathWordCount",
+			fileName:   "happyword.txt",
+			inputLines: "line1-line1new\nline2",
+			prepare: func(fileName string, lines string) error {
 				return os.WriteFile(fileName, []byte(lines), 0644)
 			},
 			expectedValues: contract.WcValues{WordCount: 2, LineCount: 2, CharacterCount: 20},
@@ -56,10 +68,10 @@ func TestProcessWCCommand(t *testing.T) {
 			expectedErr:    nil,
 		},
 		{
-			name:     "HappyPathWordWhiteSpacesCount",
-			fileName: "happyword.txt",
-			prepare: func(fileName string) error {
-				lines := "                                              "
+			name:       "HappyPathWordWhiteSpacesCount",
+			fileName:   "happyword.txt",
+			inputLines: "                                              ",
+			prepare: func(fileName string, lines string) error {
 				return os.WriteFile(fileName, []byte(lines), 0644)
 			},
 			expectedValues: contract.WcValues{WordCount: 0, LineCount: 1, CharacterCount: 46},
@@ -69,7 +81,7 @@ func TestProcessWCCommand(t *testing.T) {
 		{
 			name:     "NoFileFound",
 			fileName: "notfound.txt",
-			prepare: func(fileName string) error {
+			prepare: func(fileName string, lines string) error {
 				return nil
 			},
 			expectedValues: contract.WcValues{Err: &wcerrors.WcError{Err: os.ErrNotExist}},
@@ -77,10 +89,10 @@ func TestProcessWCCommand(t *testing.T) {
 			expectedErr:    os.ErrNotExist,
 		},
 		{
-			name:     "ReadPermissionDenied",
-			fileName: "read.txt",
-			prepare: func(fileName string) error {
-				lines := "Line 1\nLine 2\n"
+			name:       "ReadPermissionDenied",
+			fileName:   "read.txt",
+			inputLines: "Line 1\nLine 2\n",
+			prepare: func(fileName string, lines string) error {
 				err := os.WriteFile(fileName, []byte(lines), 0000)
 				if err != nil {
 					return err
@@ -93,7 +105,7 @@ func TestProcessWCCommand(t *testing.T) {
 		{
 			name:     "DirectoryFailure",
 			fileName: "cmd",
-			prepare: func(fileName string) error {
+			prepare: func(fileName string, lines string) error {
 				err := os.Mkdir("cmd", 0644)
 				if err != nil {
 					return err
@@ -108,18 +120,27 @@ func TestProcessWCCommand(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			err := tt.prepare(tt.fileName)
-			if err != nil {
-				t.Error("unable to prepare file", err)
-				return
+			var buffer bytes.Buffer
+			if tt.fileName != "" {
+				err := tt.prepare(tt.fileName, tt.inputLines)
+				if err != nil {
+					t.Error("unable to prepare file", err)
+					return
+				}
+				defer os.Remove(tt.fileName)
+			} else {
+				_, err := buffer.WriteString(tt.inputLines)
+				if err != nil {
+					t.Error("unable to write to buffer file", err)
+					return
+				}
 			}
-			defer os.Remove(tt.fileName)
 
 			var wg sync.WaitGroup
 			wcValuesCh := make(chan contract.WcValues, 1)
 
 			wg.Add(1)
-			go ProcessWCCommand(&wg, tt.fileName, tt.setFlags, wcValuesCh)
+			go ProcessWCCommand(&wg, tt.fileName, tt.setFlags, wcValuesCh, &buffer)
 			wg.Wait()
 			close(wcValuesCh)
 

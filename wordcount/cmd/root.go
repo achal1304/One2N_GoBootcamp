@@ -26,6 +26,10 @@ var rootCmd = &cobra.Command{
 	RunE: func(cmd *cobra.Command, args []string) error {
 		// fileName := args[0]
 		// Process file based on the flags
+		if len(args) == 0 {
+			args = append(args, "")
+		}
+
 		total := contract.WcValues{FileName: "total"}
 		wcValuesCh := make(chan contract.WcValues)
 		exitCode := make(chan int)
@@ -35,7 +39,7 @@ var rootCmd = &cobra.Command{
 		var wg sync.WaitGroup
 		for _, arg := range args {
 			wg.Add(1)
-			go wchandler.ProcessWCCommand(&wg, arg, flagsOptions, wcValuesCh)
+			go wchandler.ProcessWCCommand(&wg, arg, flagsOptions, wcValuesCh, os.Stdin)
 		}
 
 		go func() {
