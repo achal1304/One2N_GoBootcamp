@@ -273,3 +273,92 @@ func TestComputeTotalCount(t *testing.T) {
 		})
 	}
 }
+
+func TestReadLines(t *testing.T) {
+	tests := []struct {
+		name           string
+		lines          [][]byte
+		expectedCounts contract.WcValues
+	}{
+		{
+			name: "Multiple lines with words",
+			lines: [][]byte{
+				[]byte("This is a test."),
+				[]byte("Another line."),
+				[]byte("Final line."),
+			},
+			expectedCounts: contract.WcValues{
+				CharacterCount: 42,
+				LineCount:      3,
+				WordCount:      8,
+			},
+		},
+		{
+			name: "Empty lines",
+			lines: [][]byte{
+				[]byte(""),
+				[]byte(""),
+				[]byte(""),
+			},
+			expectedCounts: contract.WcValues{
+				CharacterCount: 3,
+				LineCount:      3,
+				WordCount:      0,
+			},
+		},
+		{
+			name: "Lines with whitespace",
+			lines: [][]byte{
+				[]byte(" "),
+				[]byte("    "),
+				[]byte("  word  "),
+			},
+			expectedCounts: contract.WcValues{
+				CharacterCount: 16,
+				LineCount:      3,
+				WordCount:      1,
+			},
+		},
+		{
+			name: "Single line with no newline",
+			lines: [][]byte{
+				[]byte("Single line with words."),
+			},
+			expectedCounts: contract.WcValues{
+				CharacterCount: 24,
+				LineCount:      1,
+				WordCount:      4,
+			},
+		},
+		{
+			name:  "No lines (empty input)",
+			lines: [][]byte{},
+			expectedCounts: contract.WcValues{
+				CharacterCount: 0,
+				LineCount:      0,
+				WordCount:      0,
+			},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			var wg sync.WaitGroup
+			resultCh := make(chan contract.WcValues)
+
+			wg.Add(1)
+			go func() {
+				ReadLines(&wg, tt.lines, resultCh)
+			}()
+			result := <-resultCh
+			wg.Wait()
+
+			close(resultCh)
+
+			assert.Equal(t, tt.expectedCounts.CharacterCount, result.CharacterCount, "CharacterCount mismatch")
+			assert.Equal(t, tt.expectedCounts.LineCount, result.LineCount, "LineCount mismatch")
+			assert.Equal(t, tt.expectedCounts.WordCount, result.WordCount, "WordCount mismatch")
+
+		})
+	}
+}

@@ -115,17 +115,7 @@ func ReadUsingBuffers(fileName string,
 		wg.Add(1)
 		workerPool <- struct{}{} // Acquire a worker
 		go func(wg *sync.WaitGroup, lines [][]byte, resultCh chan contract.WcValues) {
-			defer wg.Done()
-			var wcCounterValues contract.WcValues
-			for _, line := range lines {
-				// adding \n character as we are splitting based on that which excludes the character
-				line = append(line, '\n')
-				wcCounterValues.CharacterCount += len(line)
-				wcCounterValues.LineCount++
-				wcCounterValues.WordCount += len(bytes.Fields(line))
-			}
-
-			resultCh <- wcCounterValues
+			ReadLines(wg, lines, resultCh)
 			<-workerPool // Release the worker
 		}(&wg, append([][]byte(nil), lines...), resultCh)
 
@@ -147,42 +137,18 @@ func ReadUsingBuffers(fileName string,
 	wcValuesCh <- wcCounterValues
 }
 
-// func ReadLines(wg *sync.WaitGroup,
-// 	lines [][]byte,
-// 	resultCh chan contract.WcValues) {
-// 	wcCounterValues := contract.WcValues{}
-// 	defer wg.Done()
-// 	for _, line := range lines {
-// 		// adding \n character as we are splitting based on that which excludes the character
-// 		line = append(line, '\n')
-// 		wcCounterValues.CharacterCount += len(line)
-// 		wcCounterValues.LineCount++
-// 		wcCounterValues.WordCount += countWords(line)
-// 	}
-
-// 	resultCh <- wcCounterValues
-// }
-
-func countWords(line []byte) int {
-	inWord := false
-	wordCount := 0
-	for _, b := range line {
-		if isSpace(b) {
-			if inWord {
-				wordCount++
-			}
-			inWord = false
-		} else {
-			inWord = true
-		}
+func ReadLines(wg *sync.WaitGroup,
+	lines [][]byte,
+	resultCh chan contract.WcValues) {
+	wcCounterValues := contract.WcValues{}
+	defer wg.Done()
+	for _, line := range lines {
+		// adding \n character as we are splitting based on that which excludes the character
+		line = append(line, '\n')
+		wcCounterValues.CharacterCount += len(line)
+		wcCounterValues.LineCount++
+		wcCounterValues.WordCount += len(bytes.Fields(line))
 	}
-	if inWord {
-		wordCount++
-	}
-	return wordCount
-}
 
-func isSpace(b byte) bool {
-	// Covers common whitespace characters: space, tab, and newlines
-	return b == ' ' || b == '\t' || b == '\n' || b == '\r'
+	resultCh <- wcCounterValues
 }
