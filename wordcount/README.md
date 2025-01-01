@@ -2,6 +2,8 @@
 
 This project provides a high-performance word count utility (`wc`) for processing text files. It is designed to handle large files (5GB+) efficiently by leveraging buffered reads and concurrent processing. The utility offers functionality similar to the standard `wc` command on Linux, with added support for multiple files and interactive input mode.
 
+This utility is built based on problem statement by One2N as a part of One2N Bootcamp - https://one2n.io/go-bootcamp/go-projects/word-count-in-go
+
 ---
 
 ## Features
