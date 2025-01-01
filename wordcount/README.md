@@ -61,6 +61,8 @@ Run the binary
 ---
 
 ## How it works
+### Command and Flags Parsing:
+This project uses the Cobra library for command-line argument parsing and management.
 ### Buffered File Reading:
 Reads files in 1MB chunks to avoid loading the entire file into memory.
 ### Line Splitting:
