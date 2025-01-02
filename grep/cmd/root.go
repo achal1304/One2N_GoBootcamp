@@ -28,9 +28,16 @@ var rootCmd = &cobra.Command{
 			req.SearchString = []byte(args[0])
 
 			var reader io.Reader
-			if !GrepFlags.OutputFile && len(args) == 2 {
+			if len(args) == 3 && !GrepFlags.OutputFile {
+				handler.PrintStdOut(os.Stderr, errors.New("grep: output file flag not specified but 3 arguments given").Error())
+				os.Exit(1)
+			}
+
+			switch {
+			case !GrepFlags.OutputFile && len(args) == 2:
 				req.FileName = args[1]
-			} else if GrepFlags.OutputFile {
+
+			case GrepFlags.OutputFile:
 				if len(args) == 3 {
 					req.FileName = args[1]
 					req.OutputFileName = args[2]
@@ -38,7 +45,8 @@ var rootCmd = &cobra.Command{
 					handler.PrintStdOut(os.Stderr, errors.New("grep: output file name not specified").Error())
 					os.Exit(1)
 				}
-			} else {
+
+			default:
 				reader = os.Stdin
 			}
 
