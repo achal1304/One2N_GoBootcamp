@@ -12,9 +12,9 @@ import (
 	"github.com/achal1304/One2N_GoBootcamp/grep/utils"
 )
 
-func ProcessGrepRequest(req contract.GrepRequest) (contract.GrepResponse, error) {
-	var reader io.Reader
+func ProcessGrepRequest(req contract.GrepRequest, reader io.Reader) (contract.GrepResponse, error) {
 	var searchResponse contract.GrepResponse
+	var err error
 	if req.FileName != "" {
 		file, err := ReadFile(req.FileName)
 		if err != nil {
@@ -22,12 +22,16 @@ func ProcessGrepRequest(req contract.GrepRequest) (contract.GrepResponse, error)
 		}
 		reader = file
 		defer file.Close()
-		searchResponse, err = SearchForText(req, reader)
-		if err != nil {
-			return contract.GrepResponse{}, err
-		}
+
 	} else {
-		return searchResponse, fmt.Errorf("filename is not specified")
+		if reader == nil {
+			return searchResponse, fmt.Errorf("reader is nil, expected os.StdIn")
+		}
+	}
+
+	searchResponse, err = SearchForText(req, reader)
+	if err != nil {
+		return contract.GrepResponse{}, err
 	}
 
 	return searchResponse, nil

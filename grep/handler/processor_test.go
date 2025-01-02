@@ -3,6 +3,7 @@ package handler
 import (
 	"bytes"
 	"fmt"
+	"io"
 	"os"
 	"testing"
 
@@ -17,6 +18,7 @@ func TestProcessGrepRequest(t *testing.T) {
 		mockSetup        func(fileName string)
 		expectedResponse contract.GrepResponse
 		expectedError    string
+		reader           io.Reader
 	}{
 		{
 			name: "FileDoesNotExist",
@@ -59,15 +61,36 @@ func TestProcessGrepRequest(t *testing.T) {
 			expectedError: "",
 		},
 		{
-			name: "SearchForTextReturnsError",
+			name: "SuccessfulInputSearchStdInInput",
 			req: contract.GrepRequest{
-				FileName:     "",
-				SearchString: []byte("test"),
+				SearchString: []byte("line 1"),
 			},
 			mockSetup: func(fileName string) {
+				return
 			},
-			expectedResponse: contract.GrepResponse{},
-			expectedError:    "filename is not specified",
+			expectedResponse: contract.GrepResponse{
+				SearchedText: map[string][][]byte{
+					"": {[]byte("line 1")},
+				},
+			},
+			expectedError: "",
+			reader:        bytes.NewBufferString("line 1\nline 2\nline 3"),
+		},
+		{
+			name: "SuccessfulInputSearchStdInInput Multiple Lines",
+			req: contract.GrepRequest{
+				SearchString: []byte("line 1"),
+			},
+			mockSetup: func(fileName string) {
+				return
+			},
+			expectedResponse: contract.GrepResponse{
+				SearchedText: map[string][][]byte{
+					"": {[]byte("line 1"), []byte("line 4 and line 1")},
+				},
+			},
+			expectedError: "",
+			reader:        bytes.NewBufferString("line 1\nline 2\nline 3\nline 4 and line 1"),
 		},
 	}
 
@@ -79,7 +102,7 @@ func TestProcessGrepRequest(t *testing.T) {
 				_ = os.Remove("testdir")
 			}()
 
-			actualResponse, err := ProcessGrepRequest(tt.req)
+			actualResponse, err := ProcessGrepRequest(tt.req, tt.reader)
 
 			if tt.expectedError != "" {
 				assert.Error(t, err)
