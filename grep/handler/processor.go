@@ -22,7 +22,6 @@ func ProcessGrepRequest(req contract.GrepRequest, reader io.Reader) (contract.Gr
 		}
 		reader = file
 		defer file.Close()
-
 	} else {
 		if reader == nil {
 			return searchResponse, fmt.Errorf("reader is nil, expected os.StdIn")
@@ -65,7 +64,12 @@ func SearchForText(req contract.GrepRequest, reader io.Reader) (contract.GrepRes
 	for scanner.Scan() {
 		line := scanner.Bytes()
 		if bytes.Contains(line, req.SearchString) {
-			utils.UpdateResponseMap(response.SearchedText, req.FileName, line)
+			// Copying the line as line variable points to the memory location of the buffer
+			// When we append line to your map in UpdateResponseMap, the map ends up storing
+			// multiple references to the same slice, which is updated in subsequent iterations.
+			// which results in incorrect update in map
+			lineCopy := append([]byte{}, line...)
+			utils.UpdateResponseMap(response.SearchedText, req.FileName, lineCopy)
 		}
 	}
 
