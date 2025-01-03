@@ -87,4 +87,5 @@ func init() {
 	rootCmd.SilenceUsage = true
 	GrepFlags = contract.GrepFlags{}
 	rootCmd.Flags().BoolVarP(&GrepFlags.OutputFile, "outputFile", "o", false, "output to a file")
+	rootCmd.Flags().BoolVarP(&GrepFlags.CaseInsensitive, "insensitive", "i", false, "case insensitive search")
 }
