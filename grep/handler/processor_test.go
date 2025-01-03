@@ -190,18 +190,32 @@ func TestSearchForText(t *testing.T) {
 		prepareFile      func(inputText string) (bytes.Buffer, error)
 	}{
 		{
-			name:             "HappyPathSingleLine",
+			name:             "HappyPathSingleLine Case Sensitive",
 			req:              contract.GrepRequest{FileName: "test1.txt", SearchString: []byte("test1")},
 			inputText:        "this is line 1 test1\nline 2 with test2",
 			expectedResponse: [][]byte{[]byte("this is line 1 test1")},
 			prepareFile:      defaultPrepareFunc,
 		},
 		{
-			name:             "HappyPathMultipleLines",
+			name:             "HappyPath MultipleLines Case Sensitive",
 			req:              contract.GrepRequest{FileName: "test2.txt", SearchString: []byte("test1")},
-			inputText:        "this is line 1 test1\nline 2 with test1\nline 3 with test3",
+			inputText:        "this is line 1 test1\nline 2 with test1\nline 3 with TEST1\nline 4 with test4",
 			expectedResponse: [][]byte{[]byte("this is line 1 test1"), []byte("line 2 with test1")},
 			prepareFile:      defaultPrepareFunc,
+		},
+		{
+			name: "HappyPath Case Insensitive Search",
+			req: contract.GrepRequest{
+				FileName:     "test2.txt",
+				SearchString: []byte("test1"),
+				Flags: contract.GrepFlags{
+					CaseInsensitive: true,
+				},
+			},
+			inputText: "this is line 1 test1\nline 2 with test1\nline 3 with TEST1\nline 4 with test4",
+			expectedResponse: [][]byte{[]byte("this is line 1 test1"), []byte("line 2 with test1"),
+				[]byte("line 3 with TEST1")},
+			prepareFile: defaultPrepareFunc,
 		},
 	}
 
