@@ -1,7 +1,8 @@
 package contract
 
 type GrepFlags struct {
-	OutputFile bool
+	OutputFile      bool
+	CaseInsensitive bool
 }
 
 type GrepRequest struct {

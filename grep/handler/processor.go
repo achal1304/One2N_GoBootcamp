@@ -60,16 +60,29 @@ func ReadFile(fileName string) (*os.File, error) {
 func SearchForText(req contract.GrepRequest, reader io.Reader) (contract.GrepResponse, error) {
 	scanner := bufio.NewScanner(reader)
 	response := contract.GrepResponse{SearchedText: make(map[string][][]byte)}
+	lowerCaseSearchText := bytes.ToLower(req.SearchString)
 
 	for scanner.Scan() {
 		line := scanner.Bytes()
-		if bytes.Contains(line, req.SearchString) {
-			// Copying the line as line variable points to the memory location of the buffer
-			// When we append line to your map in UpdateResponseMap, the map ends up storing
-			// multiple references to the same slice, which is updated in subsequent iterations.
-			// which results in incorrect update in map
-			lineCopy := append([]byte{}, line...)
-			utils.UpdateResponseMap(response.SearchedText, req.FileName, lineCopy)
+		if !req.Flags.CaseInsensitive {
+			if bytes.Contains(line, req.SearchString) {
+				// Copying the line as line variable points to the memory location of the buffer
+				// When we append line to your map in UpdateResponseMap, the map ends up storing
+				// multiple references to the same slice, which is updated in subsequent iterations.
+				// which results in incorrect update in map
+				lineCopy := append([]byte{}, line...)
+				utils.UpdateResponseMap(response.SearchedText, req.FileName, lineCopy)
+			}
+		} else {
+			lowerCaseLine := bytes.ToLower(line)
+			if bytes.Contains(lowerCaseLine, lowerCaseSearchText) {
+				// Copying the line as line variable points to the memory location of the buffer
+				// When we append line to your map in UpdateResponseMap, the map ends up storing
+				// multiple references to the same slice, which is updated in subsequent iterations.
+				// which results in incorrect update in map
+				lineCopy := append([]byte{}, line...)
+				utils.UpdateResponseMap(response.SearchedText, req.FileName, lineCopy)
+			}
 		}
 	}
 
