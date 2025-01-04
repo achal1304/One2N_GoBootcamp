@@ -45,7 +45,7 @@ func ReadDirectory(wg *sync.WaitGroup,
 		if entry.IsDir() {
 			wg.Add(1)
 			go ReadDirectory(wg, path, req, resp, filePathsCh)
-		} else {
+		} else if filepath.Ext(entry.Name()) == ".txt" {
 			filePathsCh <- path
 		}
 	}
@@ -58,15 +58,14 @@ func ReadFilesInParallel(i int, readwg *sync.WaitGroup, mu *sync.Mutex,
 	defer readwg.Done()
 	localResultsMap := make(map[string][][]byte)
 	for path := range filePathsCh {
-		fmt.Println("reading in gorotune and path ", i, path)
 		file, _, err := ReadFile(path)
 		if err != nil {
-			fmt.Printf("Error reading file %s: %v\n", path, err)
+			PrintStdOut(os.Stderr, err.Error())
 			continue
 		}
 		searchResp, err := SearchForText(req, file)
 		if err != nil {
-			fmt.Printf("Error searching for text %s: %v\n", path, err)
+			PrintStdOut(os.Stderr, err.Error())
 			file.Close()
 			continue
 		}
