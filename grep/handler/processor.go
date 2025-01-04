@@ -99,7 +99,7 @@ func SearchForText(req contract.GrepRequest, reader io.Reader) (contract.GrepRes
 	}
 
 	if err := scanner.Err(); err != nil {
-		return response, fmt.Errorf("Error reading file: %v\n", err)
+		return response, fmt.Errorf("grep: %s: %v\n", req.FileName, err)
 	}
 
 	return response, nil
