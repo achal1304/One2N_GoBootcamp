@@ -4,7 +4,9 @@ import (
 	"bytes"
 	"fmt"
 	"io"
+	"io/fs"
 	"os"
+	"path/filepath"
 	"testing"
 
 	"github.com/achal1304/One2N_GoBootcamp/grep/contract"
@@ -92,13 +94,39 @@ func TestProcessGrepRequest(t *testing.T) {
 			expectedError: "",
 			reader:        bytes.NewBufferString("line 1\nline 2\nline 3\nline 4 and line 1"),
 		},
+		{
+			name: "Happy Path Directory Seach Flag Enabled",
+			req: contract.GrepRequest{
+				SearchString: []byte("line 1"),
+				FileName:     "dir",
+				Flags:        contract.GrepFlags{FolderCheck: true},
+			},
+			mockSetup: func(fileName string) {
+				err := os.Mkdir(fileName, fs.FileMode(os.O_WRONLY|os.O_RDONLY))
+				if err != nil {
+					t.Error("error while creating directory ", err)
+				}
+				_ = os.WriteFile(filepath.Join(fileName, "test1.txt"),
+					[]byte("line 4 and line 1\nline 2 and line 2"), 0644)
+				_ = os.WriteFile(filepath.Join(fileName, "test2.txt"),
+					[]byte("line 1 and line 2\nline 3 and line 4"), 0644)
+			},
+			expectedResponse: contract.GrepResponse{
+				SearchedText: map[string][][]byte{
+					filepath.Join("dir", "test1.txt"): {[]byte("line 4 and line 1")},
+					filepath.Join("dir", "test2.txt"): {[]byte("line 1 and line 2")},
+				},
+			},
+			expectedError: "",
+			reader:        bytes.NewBufferString("line 1\nline 2\nline 3\nline 4 and line 1"),
+		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			tt.mockSetup(tt.req.FileName)
 			defer func() {
-				_ = os.Remove(tt.req.FileName)
+				_ = os.RemoveAll(tt.req.FileName)
 				_ = os.Remove("testdir")
 			}()
 
@@ -107,10 +135,10 @@ func TestProcessGrepRequest(t *testing.T) {
 			if tt.expectedError != "" {
 				assert.Error(t, err)
 				assert.Contains(t, err.Error(), tt.expectedError)
-				assert.Empty(t, actualResponse)
+				assert.Equal(t, actualResponse.SearchedText, contract.GrepResponse{}.SearchedText)
 			} else {
 				assert.NoError(t, err)
-				assert.Equal(t, tt.expectedResponse, actualResponse)
+				assert.Equal(t, tt.expectedResponse.SearchedText, actualResponse.SearchedText)
 			}
 		})
 	}
@@ -157,7 +185,7 @@ func TestReadFile(t *testing.T) {
 				_ = os.Remove("testdir")
 			}()
 
-			file, err := ReadFile(tt.fileName)
+			file, _, err := ReadFile(tt.fileName)
 
 			if tt.expectedError != "" {
 				assert.Error(t, err)

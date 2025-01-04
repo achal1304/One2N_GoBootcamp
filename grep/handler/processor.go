@@ -13,48 +13,60 @@ import (
 )
 
 func ProcessGrepRequest(req contract.GrepRequest, reader io.Reader) (contract.GrepResponse, error) {
-	var searchResponse contract.GrepResponse
+	searchResponse := contract.GrepResponse{
+		SearchedText: make(map[string][][]byte),
+		Flags:        req.Flags,
+	}
 	var err error
+	var isDir bool
 	if req.FileName != "" {
-		file, err := ReadFile(req.FileName)
-		if err != nil {
+		var file *os.File
+		file, isDir, err = ReadFile(req.FileName)
+		if err != nil && !isDir {
 			return contract.GrepResponse{}, err
 		}
 		reader = file
 		defer file.Close()
 	} else {
 		if reader == nil {
-			return searchResponse, fmt.Errorf("reader is nil, expected os.StdIn")
+			return contract.GrepResponse{}, fmt.Errorf("reader is nil, expected os.StdIn")
 		}
 	}
 
-	searchResponse, err = SearchForText(req, reader)
-	if err != nil {
-		return contract.GrepResponse{}, err
+	if !isDir {
+		searchResponse, err = SearchForText(req, reader)
+		if err != nil {
+			return contract.GrepResponse{}, err
+		}
+	} else {
+		if !req.Flags.FolderCheck {
+			return contract.GrepResponse{}, fmt.Errorf("grep: %s: Is a directory", req.FileName)
+		} else {
+			ProcessDirectory(req.FileName, req, searchResponse)
+		}
 	}
 
 	return searchResponse, nil
 }
 
-func ReadFile(fileName string) (*os.File, error) {
+func ReadFile(fileName string) (*os.File, bool, error) {
 	fileInfo, err := os.Stat(fileName)
 	if err != nil {
-		return nil, fmt.Errorf("grep: %s: No such file or directory", fileName)
+		return nil, false, fmt.Errorf("grep: %s: No such file or directory", fileName)
 	}
-
 	if fileInfo.IsDir() {
-		return nil, fmt.Errorf("grep: %s: Is a directory", fileName)
+		return nil, true, fmt.Errorf("grep: %s: Is a directory", fileName)
 	}
 
 	file, err := os.Open(fileName)
 	if err != nil {
 		if errors.Is(err, os.ErrPermission) {
-			return nil, fmt.Errorf("grep: %s: Permission denied", fileName)
+			return nil, false, fmt.Errorf("grep: %s: Permission denied", fileName)
 		} else {
-			return nil, err
+			return nil, false, err
 		}
 	}
-	return file, nil
+	return file, false, nil
 }
 
 func SearchForText(req contract.GrepRequest, reader io.Reader) (contract.GrepResponse, error) {
@@ -87,7 +99,7 @@ func SearchForText(req contract.GrepRequest, reader io.Reader) (contract.GrepRes
 	}
 
 	if err := scanner.Err(); err != nil {
-		return response, fmt.Errorf("Error reading file: %v\n", err)
+		return response, fmt.Errorf("grep: %s: %v\n", req.FileName, err)
 	}
 
 	return response, nil

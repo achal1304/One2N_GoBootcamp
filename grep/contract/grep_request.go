@@ -3,6 +3,7 @@ package contract
 type GrepFlags struct {
 	OutputFile      bool
 	CaseInsensitive bool
+	FolderCheck     bool
 }
 
 type GrepRequest struct {
@@ -15,5 +16,6 @@ type GrepRequest struct {
 
 type GrepResponse struct {
 	SearchedText map[string][][]byte
+	Flags        GrepFlags
 	Err          error
 }
