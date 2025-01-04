@@ -17,7 +17,7 @@ func ProcessDirectory(dir string, req contract.GrepRequest, resp contract.GrepRe
 	var readwg sync.WaitGroup
 	var mu sync.Mutex
 	wg.Add(1)
-	go ReadDirectory(&wg, dir, req, resp, filePathsCh)
+	go ReadDirectory(&wg, dir, resp, filePathsCh)
 	for i := 0; i < WORKERS; i++ {
 		readwg.Add(1)
 		j := i
@@ -30,7 +30,6 @@ func ProcessDirectory(dir string, req contract.GrepRequest, resp contract.GrepRe
 
 func ReadDirectory(wg *sync.WaitGroup,
 	dir string,
-	req contract.GrepRequest,
 	resp contract.GrepResponse,
 	filePathsCh chan string) {
 	defer wg.Done()
@@ -44,7 +43,7 @@ func ReadDirectory(wg *sync.WaitGroup,
 		path := filepath.Join(dir, entry.Name())
 		if entry.IsDir() {
 			wg.Add(1)
-			go ReadDirectory(wg, path, req, resp, filePathsCh)
+			go ReadDirectory(wg, path, resp, filePathsCh)
 		} else if filepath.Ext(entry.Name()) == ".txt" {
 			filePathsCh <- path
 		}
