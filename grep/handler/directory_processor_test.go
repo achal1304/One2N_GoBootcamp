@@ -123,3 +123,57 @@ func TestReadDirecotry(t *testing.T) {
 		})
 	}
 }
+
+func TestReadFilesInParallel(t *testing.T) {
+	// Setup
+	dir := "mock_directory"
+	req := contract.GrepRequest{FileName: dir, SearchString: []byte("test")}
+	fileNames := []string{
+		"test1.txt", // correct data
+		"test2.txt", // correct data
+		"test3.txt", // correct data
+		"mockdir2",
+		filepath.Join("mockdir2", "test4.txt"), // correct data
+		filepath.Join("mockdir2", "test5.txt"),
+	}
+	filesData := []string{
+		"test data 1", // correct data
+		"test data 2", // correct data
+		"test data 3", // correct data
+		"this is folder",
+		"test data 4", // correct data
+		"bad data 5"}
+	actualResponse := contract.GrepResponse{SearchedText: make(map[string][][]byte)}
+	expectedResp := contract.GrepResponse{
+		SearchedText: map[string][][]byte{
+			filepath.Join(dir, fileNames[0]): {[]byte(filesData[0])},
+			filepath.Join(dir, fileNames[1]): {[]byte(filesData[1])},
+			filepath.Join(dir, fileNames[2]): {[]byte(filesData[2])},
+			filepath.Join(dir, fileNames[4]): {[]byte(filesData[4])},
+		},
+	}
+	err := dirCreator(dir, fileNames, filesData)
+	if err != nil {
+		t.Error("error creating files and directories ", err)
+	}
+	defer func() {
+		_ = os.RemoveAll(dir)
+	}()
+
+	filePathsCh := make(chan string)
+
+	var readwg sync.WaitGroup
+	var mu sync.Mutex
+
+	readwg.Add(1)
+	go ReadFilesInParallel(1, &readwg, &mu, filePathsCh, req, actualResponse)
+	go func() {
+		for _, file := range fileNames {
+			filePathsCh <- filepath.Join(dir, file)
+		}
+		close(filePathsCh)
+	}()
+	readwg.Wait()
+
+	assert.Equal(t, expectedResp.SearchedText, actualResponse.SearchedText)
+}
