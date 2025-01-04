@@ -42,7 +42,7 @@ func ProcessGrepRequest(req contract.GrepRequest, reader io.Reader) (contract.Gr
 		if !req.Flags.FolderCheck {
 			return contract.GrepResponse{}, fmt.Errorf("grep: %s: Is a directory", req.FileName)
 		} else {
-			ReadDirectory(req.FileName, req, searchResponse)
+			ProcessDirectory(req.FileName, req, searchResponse)
 		}
 	}
 
