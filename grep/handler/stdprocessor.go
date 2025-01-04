@@ -11,7 +11,7 @@ func PrintResponseStdOut(writer io.Writer, response contract.GrepResponse) {
 	for fileName, resp := range response.SearchedText {
 		for _, text := range resp {
 			if response.Flags.FolderCheck {
-				fmt.Fprintln(writer, fileName+fmt.Sprintf(":%8s", string(text)))
+				fmt.Fprintln(writer, fileName+fmt.Sprintf(":%s", string(text)))
 			} else {
 				fmt.Fprintln(writer, string(text))
 			}

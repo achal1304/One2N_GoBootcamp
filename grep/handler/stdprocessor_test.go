@@ -41,6 +41,27 @@ func TestPrintResponseStdOut(t *testing.T) {
 			cleanup: func(write io.Writer) {},
 		},
 		{
+			name: "Write To Buffer Or StdOut With Filename",
+			grepResponse: contract.GrepResponse{
+				SearchedText: map[string][][]byte{
+					"testfile.txt": {[]byte("line1\nline2\nline3")},
+				},
+				Flags: contract.GrepFlags{
+					FolderCheck: true,
+				},
+			},
+			writer: func(filname, text string) (io.Writer, error) {
+				var buffer bytes.Buffer
+				return &buffer, nil
+			},
+			expected: "testfile.txt:line1\nline2\nline3",
+			validator: func(write io.Writer) string {
+				buffer := write.(*bytes.Buffer)
+				return buffer.String()
+			},
+			cleanup: func(write io.Writer) {},
+		},
+		{
 			name: "Write To Output File",
 			grepResponse: contract.GrepResponse{
 				SearchedText: map[string][][]byte{
