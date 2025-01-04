@@ -8,9 +8,13 @@ import (
 )
 
 func PrintResponseStdOut(writer io.Writer, response contract.GrepResponse) {
-	for _, resp := range response.SearchedText {
+	for fileName, resp := range response.SearchedText {
 		for _, text := range resp {
-			fmt.Fprintln(writer, string(text))
+			if response.Flags.FolderCheck {
+				fmt.Fprintln(writer, fileName+fmt.Sprintf(":%8s", string(text)))
+			} else {
+				fmt.Fprintln(writer, string(text))
+			}
 		}
 	}
 }

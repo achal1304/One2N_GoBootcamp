@@ -157,7 +157,7 @@ func TestReadFile(t *testing.T) {
 				_ = os.Remove("testdir")
 			}()
 
-			file, err := ReadFile(tt.fileName)
+			file, _, err := ReadFile(tt.fileName)
 
 			if tt.expectedError != "" {
 				assert.Error(t, err)
