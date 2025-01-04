@@ -76,7 +76,9 @@ func ReadFilesInParallel(i int, readwg *sync.WaitGroup, mu *sync.Mutex,
 
 	mu.Lock()
 	for path, grepMatches := range localResultsMap {
-		resp.SearchedText[path] = grepMatches
+		if grepMatches != nil && len(grepMatches) > 0 {
+			resp.SearchedText[path] = grepMatches
+		}
 	}
 	mu.Unlock()
 }
