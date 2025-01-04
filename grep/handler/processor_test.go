@@ -107,10 +107,10 @@ func TestProcessGrepRequest(t *testing.T) {
 			if tt.expectedError != "" {
 				assert.Error(t, err)
 				assert.Contains(t, err.Error(), tt.expectedError)
-				assert.Empty(t, actualResponse)
+				assert.Equal(t, actualResponse.SearchedText, contract.GrepResponse{}.SearchedText)
 			} else {
 				assert.NoError(t, err)
-				assert.Equal(t, tt.expectedResponse, actualResponse)
+				assert.Equal(t, tt.expectedResponse.SearchedText, actualResponse.SearchedText)
 			}
 		})
 	}

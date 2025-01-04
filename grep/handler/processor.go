@@ -29,7 +29,7 @@ func ProcessGrepRequest(req contract.GrepRequest, reader io.Reader) (contract.Gr
 		defer file.Close()
 	} else {
 		if reader == nil {
-			return searchResponse, fmt.Errorf("reader is nil, expected os.StdIn")
+			return contract.GrepResponse{}, fmt.Errorf("reader is nil, expected os.StdIn")
 		}
 	}
 
@@ -40,7 +40,7 @@ func ProcessGrepRequest(req contract.GrepRequest, reader io.Reader) (contract.Gr
 		}
 	} else {
 		if !req.Flags.FolderCheck {
-			return searchResponse, fmt.Errorf("grep: %s: Is a directory", req.FileName)
+			return contract.GrepResponse{}, fmt.Errorf("grep: %s: Is a directory", req.FileName)
 		} else {
 			ReadDirectory(req.FileName, req, searchResponse)
 		}
