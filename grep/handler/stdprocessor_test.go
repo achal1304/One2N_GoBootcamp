@@ -108,9 +108,7 @@ func TestPrintResponseStdOut(t *testing.T) {
 
 			actualOutput := tt.validator(writer)
 
-			// as in the actual function, each line is printed on new line as we
-			// are using fmt.FprintLn, hence adding \n to expected string
-			assert.Equal(t, tt.expected+"\n", actualOutput)
+			assert.Equal(t, tt.expected, actualOutput)
 		})
 	}
 }

@@ -78,6 +78,8 @@ func SearchForText(req contract.GrepRequest, reader io.Reader) (contract.GrepRes
 	lowerCaseSearchText := bytes.ToLower(req.SearchString)
 
 	var isFound bool
+	isNSearchOperation := req.Flags.BeforeSearch > 0 || req.Flags.AfterSearch > 0 ||
+		req.Flags.BetweenSearch > 0
 	// Update BeforeSearch and AfterSearch if BetweenFlag is provided
 	if req.Flags.BetweenSearch > 0 {
 		req.Flags.BeforeSearch = req.Flags.BetweenSearch
@@ -114,33 +116,38 @@ func SearchForText(req contract.GrepRequest, reader io.Reader) (contract.GrepRes
 		}
 
 		// If the current line matches
-		if isFound {
-			if !nextMatchCheck {
-				// Add the beforeBuffer to the lineCopy (start of a match block)
-				for _, ele := range beforeBuffer {
-					lineCopy = append(lineCopy, ele...)
+		if isNSearchOperation {
+			if isFound {
+				if !nextMatchCheck {
+					// Add the beforeBuffer to the lineCopy (start of a match block)
+					for _, ele := range beforeBuffer {
+						lineCopy = append(lineCopy, ele...)
+					}
+					nextMatchCheck = true
+				} else {
+					// Append only the current line to the lineCopy
+					lineCopy = append(lineCopy, beforeBuffer[beforeBufLength]...)
 				}
-				nextMatchCheck = true
-			} else {
-				// Append only the current line to the lineCopy
-				lineCopy = append(lineCopy, beforeBuffer[beforeBufLength]...)
+				// Reset the afterBuffer and counter
+				afterBuffer = afterBuffer[:0]
+				afterCounter = afterBufLength
+			} else if nextMatchCheck && afterCounter > 0 {
+				// Collect lines in the afterBuffer after a match
+				afterBuffer = append(afterBuffer, append(line, '\n'))
+				lineCopy = append(lineCopy, line...)
+				lineCopy = append(lineCopy, '\n')
+				afterCounter--
 			}
-			// Reset the afterBuffer and counter
-			afterBuffer = afterBuffer[:0]
-			afterCounter = afterBufLength
-		} else if nextMatchCheck && afterCounter > 0 {
-			// Collect lines in the afterBuffer after a match
-			afterBuffer = append(afterBuffer, append(line, '\n'))
-			lineCopy = append(lineCopy, line...)
-			lineCopy = append(lineCopy, '\n')
-			afterCounter--
+		} else {
+			lineCopy = append([]byte{}, beforeBuffer[0]...)
 		}
 
 		// If no match and afterBuffer is empty, end the current match block
-		if !isFound && nextMatchCheck && afterCounter == 0 {
+		if (!isFound && nextMatchCheck && afterCounter == 0) || (!isNSearchOperation && isFound) {
 			utils.UpdateResponseMap(response.SearchedText, req.FileName, lineCopy)
 			lineCopy = []byte{} // Reset lineCopy
 			nextMatchCheck = false
+			isFound = false
 		}
 
 		isFound = false // Reset match state for the next line
