@@ -241,8 +241,45 @@ func TestSearchForText(t *testing.T) {
 				},
 			},
 			inputText: "this is line 1 test1\nline 2 with test1\nline 3 with TEST1\nline 4 with test4",
-			expectedResponse: [][]byte{[]byte("this is line 1 test1\n"), []byte("line 2 with test1\n"),
-				[]byte("line 3 with TEST1\n")},
+			expectedResponse: [][]byte{
+				[]byte("this is line 1 test1\n"),
+				[]byte("line 2 with test1\n"),
+				[]byte("line 3 with TEST1\n"),
+			},
+			prepareFile: defaultPrepareFunc,
+		},
+		{
+			name: "HappyPath Case C Flag Search",
+			req: contract.GrepRequest{
+				FileName:     "test2.txt",
+				SearchString: []byte("test"),
+				Flags: contract.GrepFlags{
+					BetweenSearch: 2,
+				},
+			},
+			inputText: "line1 \nline 2\nline 3\nline 4 with test\n" +
+				"line 5\nline 6\nline 7\n",
+			expectedResponse: [][]byte{
+				[]byte("line 2\nline 3\nline 4 with test\n" +
+					"line 5\nline 6\n"),
+			},
+			prepareFile: defaultPrepareFunc,
+		},
+		{
+			name: "HappyPath Case C Flag Search Consecutive lines",
+			req: contract.GrepRequest{
+				FileName:     "test2.txt",
+				SearchString: []byte("test"),
+				Flags: contract.GrepFlags{
+					BetweenSearch: 2,
+				},
+			},
+			inputText: "line1 \nline 2\nline 3\nline 4 with test\n" +
+				"line 5 with test\nline 6\nline 7\nline 8\n",
+			expectedResponse: [][]byte{
+				[]byte("line 2\nline 3\nline 4 with test\n" +
+					"line 5 with test\nline 6\nline 7\n"),
+			},
 			prepareFile: defaultPrepareFunc,
 		},
 	}

@@ -153,11 +153,6 @@ func SearchForText(req contract.GrepRequest, reader io.Reader) (contract.GrepRes
 		isFound = false // Reset match state for the next line
 	}
 
-	// Handle any remaining match block at EOF
-	if nextMatchCheck {
-		utils.UpdateResponseMap(response.SearchedText, req.FileName, lineCopy)
-	}
-
 	if err := scanner.Err(); err != nil {
 		return response, fmt.Errorf("grep: %s: %v\n", req.FileName, err)
 	}
