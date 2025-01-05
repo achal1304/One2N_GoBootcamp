@@ -4,6 +4,9 @@ type GrepFlags struct {
 	OutputFile      bool
 	CaseInsensitive bool
 	FolderCheck     bool
+	AfterSearch     int
+	BeforeSearch    int
+	BetweenSearch   int
 }
 
 type GrepRequest struct {

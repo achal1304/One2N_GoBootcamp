@@ -38,8 +38,8 @@ func TestProcessDirectory(t *testing.T) {
 	actualResponse := contract.GrepResponse{SearchedText: make(map[string][][]byte)}
 	expectedResp := contract.GrepResponse{
 		SearchedText: map[string][][]byte{
-			filepath.Join(dir, fileNames[0]): {[]byte(filesData[0])},
-			filepath.Join(dir, fileNames[1]): {[]byte(filesData[1])},
+			filepath.Join(dir, fileNames[0]): {append([]byte(filesData[0]), '\n')},
+			filepath.Join(dir, fileNames[1]): {append([]byte(filesData[1]), '\n')},
 		},
 	}
 
@@ -146,10 +146,10 @@ func TestReadFilesInParallel(t *testing.T) {
 	actualResponse := contract.GrepResponse{SearchedText: make(map[string][][]byte)}
 	expectedResp := contract.GrepResponse{
 		SearchedText: map[string][][]byte{
-			filepath.Join(dir, fileNames[0]): {[]byte(filesData[0])},
-			filepath.Join(dir, fileNames[1]): {[]byte(filesData[1])},
-			filepath.Join(dir, fileNames[2]): {[]byte(filesData[2])},
-			filepath.Join(dir, fileNames[4]): {[]byte(filesData[4])},
+			filepath.Join(dir, fileNames[0]): {append([]byte(filesData[0]), '\n')},
+			filepath.Join(dir, fileNames[1]): {append([]byte(filesData[1]), '\n')},
+			filepath.Join(dir, fileNames[2]): {append([]byte(filesData[2]), '\n')},
+			filepath.Join(dir, fileNames[4]): {append([]byte(filesData[4]), '\n')},
 		},
 	}
 	err := dirCreator(dir, fileNames, filesData)
