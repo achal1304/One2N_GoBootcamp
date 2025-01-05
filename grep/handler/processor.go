@@ -71,31 +71,84 @@ func ReadFile(fileName string) (*os.File, bool, error) {
 
 func SearchForText(req contract.GrepRequest, reader io.Reader) (contract.GrepResponse, error) {
 	scanner := bufio.NewScanner(reader)
-	response := contract.GrepResponse{SearchedText: make(map[string][][]byte)}
+	response := contract.GrepResponse{
+		SearchedText: make(map[string][][]byte),
+		Flags:        req.Flags,
+	}
 	lowerCaseSearchText := bytes.ToLower(req.SearchString)
+
+	var isFound bool
+	// Update BeforeSearch and AfterSearch if BetweenFlag is provided
+	if req.Flags.BetweenSearch > 0 {
+		req.Flags.BeforeSearch = req.Flags.BetweenSearch
+		req.Flags.AfterSearch = req.Flags.BetweenSearch
+	}
+
+	beforeBufLength := req.Flags.BeforeSearch
+	afterBufLength := req.Flags.AfterSearch
+
+	// +1 because it will include the matched element as well
+	beforeBuffer := make([][]byte, beforeBufLength+1)
+	afterBuffer := make([][]byte, 0, afterBufLength)
+
+	var nextMatchCheck bool
+	var lineCopy []byte
+	afterCounter := 0 // Tracks lines after the match block
 
 	for scanner.Scan() {
 		line := scanner.Bytes()
+
+		// Update beforeBuffer as a sliding window
+		beforeBuffer = append(beforeBuffer[1:], append(line, '\n'))
+
+		// Check if the current line contains the search term
 		if !req.Flags.CaseInsensitive {
 			if bytes.Contains(line, req.SearchString) {
-				// Copying the line as line variable points to the memory location of the buffer
-				// When we append line to your map in UpdateResponseMap, the map ends up storing
-				// multiple references to the same slice, which is updated in subsequent iterations.
-				// which results in incorrect update in map
-				lineCopy := append([]byte{}, line...)
-				utils.UpdateResponseMap(response.SearchedText, req.FileName, lineCopy)
+				isFound = true
 			}
 		} else {
 			lowerCaseLine := bytes.ToLower(line)
 			if bytes.Contains(lowerCaseLine, lowerCaseSearchText) {
-				// Copying the line as line variable points to the memory location of the buffer
-				// When we append line to your map in UpdateResponseMap, the map ends up storing
-				// multiple references to the same slice, which is updated in subsequent iterations.
-				// which results in incorrect update in map
-				lineCopy := append([]byte{}, line...)
-				utils.UpdateResponseMap(response.SearchedText, req.FileName, lineCopy)
+				isFound = true
 			}
 		}
+
+		// If the current line matches
+		if isFound {
+			if !nextMatchCheck {
+				// Add the beforeBuffer to the lineCopy (start of a match block)
+				for _, ele := range beforeBuffer {
+					lineCopy = append(lineCopy, ele...)
+				}
+				nextMatchCheck = true
+			} else {
+				// Append only the current line to the lineCopy
+				lineCopy = append(lineCopy, beforeBuffer[beforeBufLength]...)
+			}
+			// Reset the afterBuffer and counter
+			afterBuffer = afterBuffer[:0]
+			afterCounter = afterBufLength
+		} else if nextMatchCheck && afterCounter > 0 {
+			// Collect lines in the afterBuffer after a match
+			afterBuffer = append(afterBuffer, append(line, '\n'))
+			lineCopy = append(lineCopy, line...)
+			lineCopy = append(lineCopy, '\n')
+			afterCounter--
+		}
+
+		// If no match and afterBuffer is empty, end the current match block
+		if !isFound && nextMatchCheck && afterCounter == 0 {
+			utils.UpdateResponseMap(response.SearchedText, req.FileName, lineCopy)
+			lineCopy = []byte{} // Reset lineCopy
+			nextMatchCheck = false
+		}
+
+		isFound = false // Reset match state for the next line
+	}
+
+	// Handle any remaining match block at EOF
+	if nextMatchCheck {
+		utils.UpdateResponseMap(response.SearchedText, req.FileName, lineCopy)
 	}
 
 	if err := scanner.Err(); err != nil {

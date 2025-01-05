@@ -24,6 +24,7 @@ var rootCmd = &cobra.Command{
 		req := contract.GrepRequest{
 			Flags: GrepFlags,
 		}
+
 		if len(args) >= 1 {
 			req.SearchString = []byte(args[0])
 
@@ -89,4 +90,7 @@ func init() {
 	rootCmd.Flags().BoolVarP(&GrepFlags.OutputFile, "outputFile", "o", false, "output to a file")
 	rootCmd.Flags().BoolVarP(&GrepFlags.CaseInsensitive, "insensitive", "i", false, "case insensitive search")
 	rootCmd.Flags().BoolVarP(&GrepFlags.FolderCheck, "directorysearch", "r", false, "search in directories")
+	rootCmd.Flags().IntVarP(&GrepFlags.AfterSearch, "aftersearch", "A", 0, "searched line and nlines after the result")
+	rootCmd.Flags().IntVarP(&GrepFlags.BeforeSearch, "beforesearch", "B", 0, "searched line and nlines before the result.")
+	rootCmd.Flags().IntVarP(&GrepFlags.BetweenSearch, "betweensearch", "C", 0, "searched line and nlines before, after the result.")
 }
