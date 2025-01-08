@@ -1,7 +1,6 @@
 package handler
 
 import (
-	"fmt"
 	"os"
 	"path/filepath"
 
@@ -10,17 +9,14 @@ import (
 
 func ProcessDirectory(req contract.TreeRequest, resp *contract.TreeResponse) {
 	currDir := filepath.Base(req.FolderName)
-	fmt.Println("foldername is ", currDir)
 
 	root := contract.TreeNode{
 		Name:         currDir,
 		Path:         req.FolderName,
 		RelativePath: currDir,
+		IsDir:        true,
 	}
-	entries, err := os.ReadDir(root.Path)
-	if err != nil {
-		fmt.Printf("Error reading directory %s: %v\n", root.Name, err)
-	}
+	entries, _ := os.ReadDir(root.Path)
 	if len(entries) > 0 {
 		resp.DirectoryCount, resp.FileCount = ReadDirectory(&root)
 		// adding the current directory count
@@ -34,7 +30,6 @@ func ReadDirectory(
 	var dCount, fCount int
 	entries, err := os.ReadDir(root.Path)
 	if err != nil {
-		fmt.Printf("Error reading directory %s: %v\n", root.Name, err)
 		return dCount, fCount
 	}
 
@@ -47,6 +42,7 @@ func ReadDirectory(
 			nextNode := &contract.TreeNode{
 				Name:         entry.Name(),
 				Path:         path,
+				IsDir:        true,
 				RelativePath: relativePath,
 			}
 			nextDir = append(nextDir, nextNode)
@@ -58,6 +54,7 @@ func ReadDirectory(
 			nextNode := &contract.TreeNode{
 				Name:         entry.Name(),
 				Path:         path,
+				IsDir:        false,
 				RelativePath: relativePath,
 			}
 			nextDir = append(nextDir, nextNode)
@@ -66,36 +63,3 @@ func ReadDirectory(
 	root.NextDir = nextDir
 	return dCount, fCount
 }
-
-// func ReadFilesInParallel(i int, readwg *sync.WaitGroup, mu *sync.Mutex,
-// 	filePathsCh chan string,
-// 	req contract.GrepRequest,
-// 	resp contract.GrepResponse) {
-// 	defer readwg.Done()
-// 	localResultsMap := make(map[string][][]byte)
-// 	for path := range filePathsCh {
-// 		file, _, err := ReadFile(path)
-// 		if err != nil {
-// 			PrintStdOut(os.Stderr, err.Error())
-// 			continue
-// 		}
-// 		searchResp, err := SearchForText(req, file)
-// 		if err != nil {
-// 			PrintStdOut(os.Stderr, err.Error())
-// 			file.Close()
-// 			continue
-// 		}
-// 		file.Close()
-// 		mu.Lock()
-// 		localResultsMap[path] = searchResp.SearchedText[req.FileName]
-// 		mu.Unlock()
-// 	}
-
-// 	mu.Lock()
-// 	for path, grepMatches := range localResultsMap {
-// 		if grepMatches != nil && len(grepMatches) > 0 {
-// 			resp.SearchedText[path] = grepMatches
-// 		}
-// 	}
-// 	mu.Unlock()
-// }

@@ -17,6 +17,7 @@ type TreeResponse struct {
 type TreeNode struct {
 	Name         string
 	Path         string
+	IsDir        bool
 	RelativePath string
 	NextDir      []*TreeNode
 }

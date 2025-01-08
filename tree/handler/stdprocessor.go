@@ -9,21 +9,32 @@ import (
 
 func PrintResponseStdOut(writer io.Writer, response contract.TreeResponse) {
 	root := response.Root
-	fmt.Println(root.Name, root.RelativePath)
-	PrintTree(writer, root, 0)
-	finalCount := fmt.Sprintf("%d directories, %d files", response.DirectoryCount, response.FileCount)
+	fmt.Fprintln(writer, root.Name)
+	PrintTree(writer, root, 0, fmt.Sprint(""))
+	finalCount := fmt.Sprintf("\n%d directories, %d files", response.DirectoryCount, response.FileCount)
 	fmt.Fprintln(writer, finalCount)
 }
 
-func PrintTree(writer io.Writer, response *contract.TreeNode, iteration int) {
-
+func PrintTree(writer io.Writer, response *contract.TreeNode, iteration int, printer string) {
 	if response == nil {
 		return
 	}
+	var newPrinter string
 	iteration++
-	for _, node := range response.NextDir {
-		fmt.Fprintln(writer, node.RelativePath)
-		PrintTree(writer, node, iteration)
+	for i, node := range response.NextDir {
+		if node.IsDir && i < len(response.NextDir)-1 {
+			newPrinter = printer + "|-- " + node.Name
+			fmt.Fprintln(writer, newPrinter)
+			PrintTree(writer, node, iteration, printer+"|   ")
+		} else if node.IsDir && i >= len(response.NextDir)-1 {
+			newPrinter = printer + "|-- " + node.Name
+			fmt.Fprintln(writer, newPrinter)
+			PrintTree(writer, node, iteration, printer+"    ")
+		}
+		if !node.IsDir {
+			newPrinter = printer + "|-- " + node.Name
+			fmt.Fprintln(writer, newPrinter)
+		}
 	}
 	return
 }

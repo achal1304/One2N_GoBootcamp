@@ -5,14 +5,6 @@ import (
 	"os"
 )
 
-func UpdateResponseMap(respMap map[string][][]byte, key string, value []byte) {
-	if _, ok := respMap[key]; ok {
-		respMap[key] = append(respMap[key], value)
-	} else {
-		respMap[key] = [][]byte{value}
-	}
-}
-
 func GetCurrentDir() (string, error) {
 	currentDir, err := os.Getwd()
 	if err != nil {
@@ -28,6 +20,7 @@ func CheckDirectory(dir string) bool {
 		return false
 	}
 
+	fmt.Println("isdir ", info.IsDir(), info.Name())
 	if !info.IsDir() {
 		return false
 	}
