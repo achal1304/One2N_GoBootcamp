@@ -1,0 +1,65 @@
+package handler
+
+import (
+	"os"
+	"path/filepath"
+
+	"github.com/achal1304/One2N_GoBootcamp/tree/contract"
+)
+
+func ProcessDirectory(req contract.TreeRequest, resp *contract.TreeResponse) {
+	currDir := filepath.Base(req.FolderName)
+
+	root := contract.TreeNode{
+		Name:         currDir,
+		Path:         req.FolderName,
+		RelativePath: currDir,
+		IsDir:        true,
+	}
+	entries, _ := os.ReadDir(root.Path)
+	if len(entries) > 0 {
+		resp.DirectoryCount, resp.FileCount = ReadDirectory(&root)
+		// adding the current directory count
+		resp.DirectoryCount++
+	}
+	resp.Root = &root
+}
+
+func ReadDirectory(
+	root *contract.TreeNode) (int, int) {
+	var dCount, fCount int
+	entries, err := os.ReadDir(root.Path)
+	if err != nil {
+		return dCount, fCount
+	}
+
+	nextDir := []*contract.TreeNode{}
+	for _, entry := range entries {
+		relativePath := root.RelativePath + "/" + entry.Name()
+		path := filepath.Join(root.Path, entry.Name())
+		if entry.IsDir() {
+			dCount++
+			nextNode := &contract.TreeNode{
+				Name:         entry.Name(),
+				Path:         path,
+				IsDir:        true,
+				RelativePath: relativePath,
+			}
+			nextDir = append(nextDir, nextNode)
+			nextDCount, nextFCount := ReadDirectory(nextNode)
+			dCount += nextDCount
+			fCount += nextFCount
+		} else {
+			fCount++
+			nextNode := &contract.TreeNode{
+				Name:         entry.Name(),
+				Path:         path,
+				IsDir:        false,
+				RelativePath: relativePath,
+			}
+			nextDir = append(nextDir, nextNode)
+		}
+	}
+	root.NextDir = nextDir
+	return dCount, fCount
+}
