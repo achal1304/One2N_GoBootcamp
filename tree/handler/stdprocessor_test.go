@@ -97,7 +97,7 @@ func TestPrintResponseStdOut(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			// Capture output
 			var output bytes.Buffer
-			PrintResponseStdOut(&output, tt.response)
+			PrintResponse(&output, contract.TreeRequest{}, tt.response)
 
 			// Validate output
 			assert.Equal(t, tt.expectedOutput, output.String())
@@ -112,42 +112,47 @@ func TestPrintTree(t *testing.T) {
 		IsDir: true,
 		NextDir: []*contract.TreeNode{
 			{
-				Name:  "dir1",
-				IsDir: true,
+				Name:         "dir1",
+				IsDir:        true,
+				RelativePath: "root/dir1",
 				NextDir: []*contract.TreeNode{
-					{Name: "file1", IsDir: false},
-					{Name: "file2", IsDir: false},
+					{Name: "file1", IsDir: false, RelativePath: "root/dir1/file1"},
+					{Name: "file2", IsDir: false, RelativePath: "root/dir1/file2"},
 				},
 			},
 			{
-				Name:  "dir2",
-				IsDir: true,
+				Name:         "dir2",
+				IsDir:        true,
+				RelativePath: "root/dir2",
 				NextDir: []*contract.TreeNode{
-					{Name: "file3", IsDir: false},
+					{Name: "file3", IsDir: false, RelativePath: "root/dir2/file3"},
 				},
 			},
 			{
-				Name:  "file4",
-				IsDir: false,
+				Name:         "file4",
+				IsDir:        false,
+				RelativePath: "root/file4",
 			},
 			{
-				Name:  "dir3",
-				IsDir: true,
+				Name:         "dir3",
+				IsDir:        true,
+				RelativePath: "root/dir3",
 				NextDir: []*contract.TreeNode{
-					{Name: "file5", IsDir: false},
+					{Name: "file5", IsDir: false, RelativePath: "root/dir3/file5"},
 				},
 			},
 		},
 	}
 
-	// Use a buffer to capture the output
-	var buf bytes.Buffer
-
-	// Call PrintTree
-	PrintTree(&buf, tree, 0, "")
-
-	// Define the expected output
-	expected := `|-- dir1
+	tests := []struct {
+		name     string
+		req      contract.TreeRequest
+		expected string
+	}{
+		{
+			name: "Default Path",
+			req:  contract.TreeRequest{},
+			expected: `|-- dir1
 |   |-- file1
 |   |-- file2
 |-- dir2
@@ -155,12 +160,39 @@ func TestPrintTree(t *testing.T) {
 |-- file4
 |-- dir3
     |-- file5
-`
+`,
+		},
+		{
+			name: "With Relative Path",
+			req: contract.TreeRequest{
+				Flags: contract.TreeFlags{RelatviePath: true},
+			},
+			expected: `|-- root/dir1
+|   |-- root/dir1/file1
+|   |-- root/dir1/file2
+|-- root/dir2
+|   |-- root/dir2/file3
+|-- root/file4
+|-- root/dir3
+    |-- root/dir3/file5
+`,
+		},
+	}
 
-	// Compare captured output with the expected output
-	output := buf.String()
-	if output != expected {
-		t.Errorf("Expected:\n%s\nBut got:\n%s", expected, output)
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			// Use a buffer to capture the output
+			var buf bytes.Buffer
+
+			// Call PrintTree
+			PrintTree(&buf, tt.req, tree, 0, "")
+
+			// Compare captured output with the expected output
+			output := buf.String()
+			if output != tt.expected {
+				t.Errorf("Test case: %s\nExpected:\n%s\nBut got:\n%s", tt.name, tt.expected, output)
+			}
+		})
 	}
 }
 

@@ -60,7 +60,7 @@ func TestProcessDirectory(t *testing.T) {
 
 			resp := &contract.TreeResponse{}
 
-			ProcessDirectory(tt.req, resp)
+			ProcessDirectory(tt.req, tt.req.FolderName, resp)
 
 			assert.Equal(t, tt.expectedResp, resp.Root)
 		})

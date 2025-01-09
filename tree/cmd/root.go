@@ -19,6 +19,7 @@ var rootCmd = &cobra.Command{
 	Short: "print directory structures in tree format",
 	RunE: func(cmd *cobra.Command, args []string) error {
 		var req contract.TreeRequest
+		req.Flags = TreeFlags
 		if len(args) > 0 {
 			req.FolderName = args[0]
 		}
@@ -28,7 +29,7 @@ var rootCmd = &cobra.Command{
 			os.Exit(1)
 		}
 
-		handler.PrintResponseStdOut(os.Stdout, resp)
+		handler.PrintResponse(os.Stdout, req, resp)
 
 		return nil
 	},
@@ -46,5 +47,5 @@ func Execute() {
 func init() {
 	rootCmd.SilenceUsage = true
 	TreeFlags = contract.TreeFlags{}
-	// rootCmd.Flags().BoolVarP(&TreeFlags.OutputFile, "outputFile", "o", false, "output to a file")
+	rootCmd.Flags().BoolVarP(&TreeFlags.RelatviePath, "relativePath", "f", false, "print relative path")
 }

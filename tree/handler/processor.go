@@ -12,7 +12,6 @@ func ProcessTreeRequest(req contract.TreeRequest) (contract.TreeResponse, error)
 	var currDirName string
 	if req.FolderName != "" {
 		isDir := utils.CheckDirectory(req.FolderName)
-		fmt.Println("isdir is", isDir, req.FolderName)
 		if !isDir {
 			return contract.TreeResponse{}, fmt.Errorf("%s [error opening dir]", req.FolderName)
 		}
@@ -25,7 +24,6 @@ func ProcessTreeRequest(req contract.TreeRequest) (contract.TreeResponse, error)
 		currDirName = currentDir
 	}
 
-	req.FolderName = currDirName
-	ProcessDirectory(req, &searchResponse)
+	ProcessDirectory(req, currDirName, &searchResponse)
 	return searchResponse, nil
 }

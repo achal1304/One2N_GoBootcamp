@@ -1,6 +1,7 @@
 package contract
 
 type TreeFlags struct {
+	RelatviePath bool
 }
 
 type TreeRequest struct {

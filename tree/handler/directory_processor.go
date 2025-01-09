@@ -1,20 +1,32 @@
 package handler
 
 import (
+	"fmt"
 	"os"
 	"path/filepath"
 
 	"github.com/achal1304/One2N_GoBootcamp/tree/contract"
 )
 
-func ProcessDirectory(req contract.TreeRequest, resp *contract.TreeResponse) {
-	currDir := filepath.Base(req.FolderName)
+func ProcessDirectory(req contract.TreeRequest, dir string, resp *contract.TreeResponse) {
+	currDir := filepath.Base(dir)
+	fmt.Println("dir and curr dir", dir, currDir)
 
-	root := contract.TreeNode{
-		Name:         currDir,
-		Path:         req.FolderName,
-		RelativePath: currDir,
-		IsDir:        true,
+	var root contract.TreeNode
+	if req.FolderName != "" {
+		root = contract.TreeNode{
+			Name:         currDir,
+			Path:         req.FolderName,
+			RelativePath: currDir,
+			IsDir:        true,
+		}
+	} else {
+		root = contract.TreeNode{
+			Name:         ".",
+			Path:         ".",
+			RelativePath: ".",
+			IsDir:        true,
+		}
 	}
 	entries, _ := os.ReadDir(root.Path)
 	if len(entries) > 0 {
