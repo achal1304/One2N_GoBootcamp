@@ -20,7 +20,6 @@ func CheckDirectory(dir string) bool {
 		return false
 	}
 
-	fmt.Println("isdir ", info.IsDir(), info.Name())
 	if !info.IsDir() {
 		return false
 	}

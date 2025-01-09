@@ -14,13 +14,14 @@ import (
 
 func TestProcessDirectory(t *testing.T) {
 	tests := []struct {
-		name         string
-		fileNames    []string
-		filesData    []string
-		expectedResp *contract.TreeNode
-		req          contract.TreeRequest
-		errorResonse string
-		prepareDir   func(dirName string, fileNames []string, data []string) error
+		name             string
+		fileNames        []string
+		filesData        []string
+		expectedResp     *contract.TreeNode
+		req              contract.TreeRequest
+		expectedTreeResp *contract.TreeResponse
+		errorResonse     string
+		prepareDir       func(dirName string, fileNames []string, data []string) error
 	}{
 		{
 			name:      "Happy Path Folder Provider",
@@ -44,6 +45,67 @@ func TestProcessDirectory(t *testing.T) {
 					},
 				},
 			},
+			expectedTreeResp: &contract.TreeResponse{
+				DirectoryCount: 2,
+				FileCount:      0,
+			},
+			prepareDir: DirCreator,
+		},
+		{
+			name:      "Directory Print No Dir In Parent Dir - Should Give Zero ",
+			fileNames: []string{"test1.txt"},
+			filesData: []string{""},
+			req: contract.TreeRequest{
+				FolderName: "dir1",
+				Flags:      contract.TreeFlags{DirectoryPrint: true},
+			},
+			expectedResp: &contract.TreeNode{
+				Name:         "dir1",
+				IsDir:        true,
+				RelativePath: "dir1",
+				Path:         "dir1",
+				NextDir: []*contract.TreeNode{
+					{
+						Name:         "test1.txt",
+						IsDir:        false,
+						Path:         filepath.Join("dir1", "test1.txt"),
+						RelativePath: "dir1/test1.txt",
+					},
+				},
+			},
+			expectedTreeResp: &contract.TreeResponse{
+				DirectoryCount: 0,
+				FileCount:      0,
+			},
+			prepareDir: DirCreator,
+		},
+		{
+			name:      "Directory Print 1 Dir In Parent Dir - Should Print 2 ",
+			fileNames: []string{"test1"},
+			filesData: []string{""},
+			req: contract.TreeRequest{
+				FolderName: "dir1",
+				Flags:      contract.TreeFlags{DirectoryPrint: true},
+			},
+			expectedResp: &contract.TreeNode{
+				Name:         "dir1",
+				IsDir:        true,
+				RelativePath: "dir1",
+				Path:         "dir1",
+				NextDir: []*contract.TreeNode{
+					{
+						Name:         "test1",
+						IsDir:        true,
+						Path:         filepath.Join("dir1", "test1"),
+						RelativePath: "dir1/test1",
+						NextDir:      []*contract.TreeNode{},
+					},
+				},
+			},
+			expectedTreeResp: &contract.TreeResponse{
+				DirectoryCount: 2,
+				FileCount:      0,
+			},
 			prepareDir: DirCreator,
 		},
 	}
@@ -58,11 +120,9 @@ func TestProcessDirectory(t *testing.T) {
 				_ = os.RemoveAll(tt.req.FolderName)
 			}()
 
-			resp := &contract.TreeResponse{}
+			ProcessDirectory(tt.req, tt.req.FolderName, tt.expectedTreeResp)
 
-			ProcessDirectory(tt.req, tt.req.FolderName, resp)
-
-			assert.Equal(t, tt.expectedResp, resp.Root)
+			assert.Equal(t, tt.expectedResp, tt.expectedTreeResp.Root)
 		})
 	}
 }

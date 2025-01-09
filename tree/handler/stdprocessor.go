@@ -9,9 +9,15 @@ import (
 
 func PrintResponse(writer io.Writer, req contract.TreeRequest, response contract.TreeResponse) {
 	root := response.Root
+	var finalCount string
 	PrintStdOut(writer, root.Name)
 	PrintTree(writer, req, root, 0, fmt.Sprint(""))
-	finalCount := fmt.Sprintf("\n%d directories, %d files", response.DirectoryCount, response.FileCount)
+
+	if req.Flags.DirectoryPrint {
+		finalCount = fmt.Sprintf("\n%d directories", response.DirectoryCount)
+	} else {
+		finalCount = fmt.Sprintf("\n%d directories, %d files", response.DirectoryCount, response.FileCount)
+	}
 	PrintStdOut(writer, finalCount)
 }
 
@@ -22,10 +28,14 @@ func PrintTree(writer io.Writer, req contract.TreeRequest, response *contract.Tr
 	var newPrinter string
 	iteration++
 	for i, node := range response.NextDir {
-		if !req.Flags.RelatviePath {
+		if !req.Flags.RelativePath {
 			newPrinter = printer + "|-- " + node.Name
 		} else {
 			newPrinter = printer + "|-- " + node.RelativePath
+		}
+
+		if req.Flags.DirectoryPrint && !node.IsDir {
+			continue
 		}
 
 		if node.IsDir && i < len(response.NextDir)-1 {

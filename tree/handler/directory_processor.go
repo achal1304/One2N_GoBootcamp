@@ -1,7 +1,6 @@
 package handler
 
 import (
-	"fmt"
 	"os"
 	"path/filepath"
 
@@ -10,7 +9,6 @@ import (
 
 func ProcessDirectory(req contract.TreeRequest, dir string, resp *contract.TreeResponse) {
 	currDir := filepath.Base(dir)
-	fmt.Println("dir and curr dir", dir, currDir)
 
 	var root contract.TreeNode
 	if req.FolderName != "" {
@@ -31,8 +29,17 @@ func ProcessDirectory(req contract.TreeRequest, dir string, resp *contract.TreeR
 	entries, _ := os.ReadDir(root.Path)
 	if len(entries) > 0 {
 		resp.DirectoryCount, resp.FileCount = ReadDirectory(&root)
-		// adding the current directory count
-		resp.DirectoryCount++
+		// adding the current directory count if it contains even a single directory
+		if req.Flags.DirectoryPrint {
+			for _, entry := range entries {
+				if entry.IsDir() {
+					resp.DirectoryCount++
+					break
+				}
+			}
+		} else {
+			resp.DirectoryCount++
+		}
 	}
 	resp.Root = &root
 }

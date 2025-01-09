@@ -47,5 +47,6 @@ func Execute() {
 func init() {
 	rootCmd.SilenceUsage = true
 	TreeFlags = contract.TreeFlags{}
-	rootCmd.Flags().BoolVarP(&TreeFlags.RelatviePath, "relativePath", "f", false, "print relative path")
+	rootCmd.Flags().BoolVarP(&TreeFlags.RelativePath, "relativePath", "f", false, "print relative path")
+	rootCmd.Flags().BoolVarP(&TreeFlags.DirectoryPrint, "printDirectories", "d", false, "print directories only")
 }
