@@ -25,7 +25,6 @@ func ProcessTreeRequest(req contract.TreeRequest) (contract.TreeResponse, error)
 		currDirName = currentDir
 	}
 
-	req.FolderName = currDirName
-	ProcessDirectory(req, &searchResponse)
+	ProcessDirectory(req, currDirName, &searchResponse)
 	return searchResponse, nil
 }
