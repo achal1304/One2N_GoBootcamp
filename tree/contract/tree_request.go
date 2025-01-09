@@ -1,7 +1,8 @@
 package contract
 
 type TreeFlags struct {
-	RelatviePath bool
+	RelativePath   bool
+	DirectoryPrint bool
 }
 
 type TreeRequest struct {

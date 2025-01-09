@@ -165,7 +165,7 @@ func TestPrintTree(t *testing.T) {
 		{
 			name: "With Relative Path",
 			req: contract.TreeRequest{
-				Flags: contract.TreeFlags{RelatviePath: true},
+				Flags: contract.TreeFlags{RelativePath: true},
 			},
 			expected: `|-- root/dir1
 |   |-- root/dir1/file1
