@@ -1,10 +1,12 @@
 package handler
 
 import (
+	"fmt"
 	"os"
 	"path/filepath"
 
 	"github.com/achal1304/One2N_GoBootcamp/tree/contract"
+	"github.com/achal1304/One2N_GoBootcamp/tree/utils"
 )
 
 func ProcessDirectory(req contract.TreeRequest, dir string, resp *contract.TreeResponse) {
@@ -26,7 +28,13 @@ func ProcessDirectory(req contract.TreeRequest, dir string, resp *contract.TreeR
 			IsDir:        true,
 		}
 	}
+	info, err := os.Stat(root.Path)
+	if err != nil {
+		fmt.Println("Error:", err)
+		return
+	}
 	entries, _ := os.ReadDir(root.Path)
+	root.Permission = utils.GetPermissionString(info.Mode())
 	if len(entries) > 0 {
 		resp.DirectoryCount, resp.FileCount = ReadDirectory(&root, 0, req.Flags.Levels)
 		// adding the current directory count if it contains even a single directory
@@ -58,12 +66,21 @@ func ReadDirectory(
 	for _, entry := range entries {
 		relativePath := root.RelativePath + "/" + entry.Name()
 		path := filepath.Join(root.Path, entry.Name())
+		// Get full file info to access permissions
+		fileInfo, err := entry.Info()
+		if err != nil {
+			continue // Skip if file info cannot be read
+		}
+
+		permission := utils.GetPermissionString(fileInfo.Mode())
+
 		if entry.IsDir() {
 			dCount++
 			nextNode := &contract.TreeNode{
 				Name:         entry.Name(),
 				Path:         path,
 				IsDir:        true,
+				Permission:   permission,
 				RelativePath: relativePath,
 			}
 			nextDir = append(nextDir, nextNode)
@@ -76,6 +93,7 @@ func ReadDirectory(
 				Name:         entry.Name(),
 				Path:         path,
 				IsDir:        false,
+				Permission:   permission,
 				RelativePath: relativePath,
 			}
 			nextDir = append(nextDir, nextNode)

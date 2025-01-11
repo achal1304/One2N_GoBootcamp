@@ -56,5 +56,6 @@ func init() {
 	TreeFlags = contract.TreeFlags{}
 	rootCmd.Flags().BoolVarP(&TreeFlags.RelativePath, "relativePath", "f", false, "print relative path")
 	rootCmd.Flags().BoolVarP(&TreeFlags.DirectoryPrint, "printDirectories", "d", false, "print directories only")
+	rootCmd.Flags().BoolVarP(&TreeFlags.Permission, "permission", "p", false, "print permissions")
 	rootCmd.Flags().IntVarP(&TreeFlags.Levels, "nestedLevels", "L", contract.MaxLevel, "print nested levels only")
 }

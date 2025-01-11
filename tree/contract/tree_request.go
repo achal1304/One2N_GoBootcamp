@@ -3,6 +3,7 @@ package contract
 type TreeFlags struct {
 	RelativePath   bool
 	DirectoryPrint bool
+	Permission     bool
 	Levels         int
 }
 
@@ -24,5 +25,6 @@ type TreeNode struct {
 	Path         string
 	IsDir        bool
 	RelativePath string
+	Permission   string
 	NextDir      []*TreeNode
 }
