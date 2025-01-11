@@ -93,6 +93,116 @@ func TestPrintResponseStdOut(t *testing.T) {
 `,
 		},
 		{
+			name: "Permission Print Should Print Permission With Names",
+			response: contract.TreeResponse{
+				Root: &contract.TreeNode{
+					Name:         "testDir",
+					IsDir:        true,
+					Path:         "testDir",
+					RelativePath: "testDir",
+					Permission:   "[drwxrwxrwx]",
+					NextDir: []*contract.TreeNode{
+						{
+							Name:         "subDir",
+							IsDir:        true,
+							Path:         "testDir/subDir",
+							RelativePath: "testDir/subDir",
+							Permission:   "[drwxrwxrwx]",
+						},
+						{
+							Name:         "file1.txt",
+							IsDir:        false,
+							Path:         "testDir/file1.txt",
+							RelativePath: "testDir/file1.txt",
+							Permission:   "[-rw-rw-rw-]",
+						},
+					},
+				},
+				DirectoryCount: 2,
+				FileCount:      1,
+			},
+			req: contract.TreeRequest{Flags: contract.TreeFlags{Permission: true}},
+			expectedOutput: `[drwxrwxrwx] testDir
+|-- [drwxrwxrwx] subDir
+|-- [-rw-rw-rw-] file1.txt
+
+2 directories, 1 files
+`,
+		},
+		{
+			name: "Permission Print With Relative Path",
+			response: contract.TreeResponse{
+				Root: &contract.TreeNode{
+					Name:         "testDir",
+					IsDir:        true,
+					Path:         "testDir",
+					RelativePath: "testDir",
+					Permission:   "[drwxrwxrwx]",
+					NextDir: []*contract.TreeNode{
+						{
+							Name:         "subDir",
+							IsDir:        true,
+							Path:         "testDir/subDir",
+							RelativePath: "testDir/subDir",
+							Permission:   "[drwxrwxrwx]",
+						},
+						{
+							Name:         "file1.txt",
+							IsDir:        false,
+							Path:         "testDir/file1.txt",
+							RelativePath: "testDir/file1.txt",
+							Permission:   "[-rw-rw-rw-]",
+						},
+					},
+				},
+				DirectoryCount: 2,
+				FileCount:      1,
+			},
+			req: contract.TreeRequest{Flags: contract.TreeFlags{Permission: true, RelativePath: true}},
+			expectedOutput: `[drwxrwxrwx] testDir
+|-- [drwxrwxrwx] testDir/subDir
+|-- [-rw-rw-rw-] testDir/file1.txt
+
+2 directories, 1 files
+`,
+		},
+		{
+			name: "Permission Print With Direcotory Only Path",
+			response: contract.TreeResponse{
+				Root: &contract.TreeNode{
+					Name:         "testDir",
+					IsDir:        true,
+					Path:         "testDir",
+					RelativePath: "testDir",
+					Permission:   "[drwxrwxrwx]",
+					NextDir: []*contract.TreeNode{
+						{
+							Name:         "subDir",
+							IsDir:        true,
+							Path:         "testDir/subDir",
+							RelativePath: "testDir/subDir",
+							Permission:   "[drwxrwxrwx]",
+						},
+						{
+							Name:         "file1.txt",
+							IsDir:        false,
+							Path:         "testDir/file1.txt",
+							RelativePath: "testDir/file1.txt",
+							Permission:   "[-rw-rw-rw-]",
+						},
+					},
+				},
+				DirectoryCount: 2,
+				FileCount:      0,
+			},
+			req: contract.TreeRequest{Flags: contract.TreeFlags{Permission: true, DirectoryPrint: true}},
+			expectedOutput: `[drwxrwxrwx] testDir
+|-- [drwxrwxrwx] subDir
+
+2 directories
+`,
+		},
+		{
 			name: "Directory with Files and Subdirectories",
 			response: contract.TreeResponse{
 				Root: &contract.TreeNode{
