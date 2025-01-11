@@ -36,12 +36,14 @@ func TestProcessDirectory(t *testing.T) {
 				IsDir:        true,
 				RelativePath: "dir1",
 				Path:         "dir1",
+				Permission:   "[drwxrwxrwx]",
 				NextDir: []*contract.TreeNode{
 					{
 						Name:         "test1",
 						IsDir:        true,
 						Path:         filepath.Join("dir1", "test1"),
 						RelativePath: "dir1/test1",
+						Permission:   "[drwxrwxrwx]",
 						NextDir:      []*contract.TreeNode{},
 					},
 				},
@@ -65,12 +67,14 @@ func TestProcessDirectory(t *testing.T) {
 				IsDir:        true,
 				RelativePath: "dir1",
 				Path:         "dir1",
+				Permission:   "[drwxrwxrwx]",
 				NextDir: []*contract.TreeNode{
 					{
 						Name:         "test1.txt",
 						IsDir:        false,
 						Path:         filepath.Join("dir1", "test1.txt"),
 						RelativePath: "dir1/test1.txt",
+						Permission:   "[-rw-rw-rw-]",
 					},
 				},
 			},
@@ -93,6 +97,7 @@ func TestProcessDirectory(t *testing.T) {
 				IsDir:        true,
 				RelativePath: "dir1",
 				Path:         "dir1",
+				Permission:   "[drwxrwxrwx]",
 				NextDir: []*contract.TreeNode{
 					{
 						Name:         "test1",
@@ -100,6 +105,7 @@ func TestProcessDirectory(t *testing.T) {
 						Path:         filepath.Join("dir1", "test1"),
 						RelativePath: "dir1/test1",
 						NextDir:      []*contract.TreeNode{},
+						Permission:   "[drwxrwxrwx]",
 					},
 				},
 			},
@@ -150,18 +156,21 @@ func TestReadDirectory(t *testing.T) {
 				Path:         "dir1",
 				RelativePath: "dir1",
 				IsDir:        true,
+				Permission:   "[drwxrwxrwx]",
 			},
 			expectedResp: &contract.TreeNode{
 				Name:         "dir1",
 				IsDir:        true,
 				RelativePath: "dir1",
 				Path:         "dir1",
+				Permission:   "[drwxrwxrwx]",
 				NextDir: []*contract.TreeNode{
 					{
 						Name:         "test1",
 						IsDir:        true,
 						Path:         filepath.Join("dir1", "test1"),
 						RelativePath: "dir1/test1",
+						Permission:   "[drwxrwxrwx]",
 						NextDir:      []*contract.TreeNode{},
 					},
 					{
@@ -169,6 +178,7 @@ func TestReadDirectory(t *testing.T) {
 						IsDir:        false,
 						Path:         filepath.Join("dir1", "test2.txt"),
 						RelativePath: "dir1/test2.txt",
+						Permission:   "[-rw-rw-rw-]",
 					},
 				},
 			},
@@ -186,6 +196,7 @@ func TestReadDirectory(t *testing.T) {
 				Path:         "dir1",
 				RelativePath: "dir1",
 				IsDir:        true,
+				Permission:   "[drwxrwxrwx]",
 			},
 			expectedResp: &contract.TreeNode{
 				Name:         "dir1",
@@ -193,6 +204,7 @@ func TestReadDirectory(t *testing.T) {
 				RelativePath: "dir1",
 				Path:         "dir1",
 				NextDir:      []*contract.TreeNode{},
+				Permission:   "[drwxrwxrwx]",
 			},
 			prepareDir:     DirCreator,
 			expfolderCount: 0,
@@ -209,17 +221,20 @@ func TestReadDirectory(t *testing.T) {
 				Path:         "dir1",
 				RelativePath: "dir1",
 				IsDir:        true,
+				Permission:   "[drwxrwxrwx]",
 			},
 			expectedResp: &contract.TreeNode{
 				Name:         "dir1",
 				IsDir:        true,
 				RelativePath: "dir1",
 				Path:         "dir1",
+				Permission:   "[drwxrwxrwx]",
 				NextDir: []*contract.TreeNode{
 					{
 						Name:         "test1",
 						IsDir:        true,
 						Path:         filepath.Join("dir1", "test1"),
+						Permission:   "[drwxrwxrwx]",
 						RelativePath: "dir1/test1",
 					},
 					{
@@ -227,6 +242,7 @@ func TestReadDirectory(t *testing.T) {
 						IsDir:        false,
 						Path:         filepath.Join("dir1", "test2.txt"),
 						RelativePath: "dir1/test2.txt",
+						Permission:   "[-rw-rw-rw-]",
 					},
 				},
 			},

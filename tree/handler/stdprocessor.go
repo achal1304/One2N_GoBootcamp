@@ -10,7 +10,7 @@ import (
 func PrintResponse(writer io.Writer, req contract.TreeRequest, response contract.TreeResponse) {
 	root := response.Root
 	var finalCount string
-	PrintStdOut(writer, root.Name)
+	PrintStdOut(writer, getPrinter(req, root, "", ""))
 	PrintTree(writer, req, root, 0, fmt.Sprint(""))
 
 	if req.Flags.DirectoryPrint {
@@ -25,28 +25,21 @@ func PrintTree(writer io.Writer, req contract.TreeRequest, response *contract.Tr
 	if response == nil {
 		return
 	}
-	var newPrinter string
 	iteration++
 	for i, node := range response.NextDir {
-		if !req.Flags.RelativePath {
-			newPrinter = printer + "|-- " + node.Name
-		} else {
-			newPrinter = printer + "|-- " + node.RelativePath
-		}
-
 		if req.Flags.DirectoryPrint && !node.IsDir {
 			continue
 		}
 
 		if node.IsDir && i < len(response.NextDir)-1 {
-			PrintStdOut(writer, newPrinter)
+			PrintStdOut(writer, getPrinter(req, node, printer, "|-- "))
 			PrintTree(writer, req, node, iteration, printer+"|   ")
 		} else if node.IsDir && i >= len(response.NextDir)-1 {
-			PrintStdOut(writer, newPrinter)
+			PrintStdOut(writer, getPrinter(req, node, printer, "|-- "))
 			PrintTree(writer, req, node, iteration, printer+"    ")
 		}
 		if !node.IsDir {
-			PrintStdOut(writer, newPrinter)
+			PrintStdOut(writer, getPrinter(req, node, printer, "|-- "))
 		}
 	}
 	return
@@ -54,4 +47,18 @@ func PrintTree(writer io.Writer, req contract.TreeRequest, response *contract.Tr
 
 func PrintStdOut(writer io.Writer, text string) {
 	fmt.Fprintln(writer, text)
+}
+
+func getPrinter(req contract.TreeRequest, node *contract.TreeNode, printer string, seperator string) string {
+	newPrinter := ""
+	if !req.Flags.RelativePath && !req.Flags.Permission {
+		newPrinter = printer + seperator + node.Name
+	} else if req.Flags.RelativePath && !req.Flags.Permission {
+		newPrinter = printer + seperator + node.RelativePath
+	} else if !req.Flags.RelativePath && req.Flags.Permission {
+		newPrinter = printer + seperator + node.Permission + " " + node.Name
+	} else {
+		newPrinter = printer + seperator + node.Permission + " " + node.RelativePath
+	}
+	return newPrinter
 }

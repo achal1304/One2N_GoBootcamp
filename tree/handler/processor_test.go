@@ -34,12 +34,14 @@ func TestProcessTreeRequest(t *testing.T) {
 					IsDir:        true,
 					Path:         "testDir",
 					RelativePath: "testDir",
+					Permission:   "[drwxrwxrwx]",
 					NextDir: []*contract.TreeNode{
 						{
 							Name:         "subDir",
 							IsDir:        true,
 							Path:         filepath.Join("testDir", "subDir"),
 							RelativePath: "testDir/subDir",
+							Permission:   "[drwxrwxrwx]",
 							NextDir:      []*contract.TreeNode{},
 						},
 					},
@@ -68,6 +70,7 @@ func TestProcessTreeRequest(t *testing.T) {
 					IsDir:        true,
 					Path:         "handler",
 					RelativePath: "handler",
+					Permission:   "[drwxrwxrwx]",
 				},
 			},
 			errorExpected: false,
