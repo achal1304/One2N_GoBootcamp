@@ -13,6 +13,7 @@ func TestPrintResponseStdOut(t *testing.T) {
 		name           string
 		response       contract.TreeResponse
 		expectedOutput string
+		req            contract.TreeRequest
 	}{
 		{
 			name: "Happy Path - Single Directory with One Subdirectory",
@@ -59,6 +60,39 @@ func TestPrintResponseStdOut(t *testing.T) {
 `,
 		},
 		{
+			name: "Directory Print Should Print Directories Only",
+			response: contract.TreeResponse{
+				Root: &contract.TreeNode{
+					Name:         "testDir",
+					IsDir:        true,
+					Path:         "testDir",
+					RelativePath: "testDir",
+					NextDir: []*contract.TreeNode{
+						{
+							Name:         "subDir",
+							IsDir:        true,
+							Path:         "testDir/subDir",
+							RelativePath: "testDir/subDir",
+						},
+						{
+							Name:         "file1.txt",
+							IsDir:        false,
+							Path:         "testDir/file1.txt",
+							RelativePath: "testDir/file1.txt",
+						},
+					},
+				},
+				DirectoryCount: 2,
+				FileCount:      0,
+			},
+			req: contract.TreeRequest{Flags: contract.TreeFlags{DirectoryPrint: true}},
+			expectedOutput: `testDir
+|-- subDir
+
+2 directories
+`,
+		},
+		{
 			name: "Directory with Files and Subdirectories",
 			response: contract.TreeResponse{
 				Root: &contract.TreeNode{
@@ -81,14 +115,14 @@ func TestPrintResponseStdOut(t *testing.T) {
 						},
 					},
 				},
-				DirectoryCount: 1,
+				DirectoryCount: 2,
 				FileCount:      1,
 			},
 			expectedOutput: `testDir
 |-- subDir
 |-- file1.txt
 
-1 directories, 1 files
+2 directories, 1 files
 `,
 		},
 	}
@@ -97,7 +131,7 @@ func TestPrintResponseStdOut(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			// Capture output
 			var output bytes.Buffer
-			PrintResponse(&output, contract.TreeRequest{}, tt.response)
+			PrintResponse(&output, tt.req, tt.response)
 
 			// Validate output
 			assert.Equal(t, tt.expectedOutput, output.String())

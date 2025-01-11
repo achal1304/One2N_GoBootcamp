@@ -3,7 +3,10 @@ package contract
 type TreeFlags struct {
 	RelativePath   bool
 	DirectoryPrint bool
+	Levels         int
 }
+
+const MaxLevel = 999999999
 
 type TreeRequest struct {
 	FolderName string

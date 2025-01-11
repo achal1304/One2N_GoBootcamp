@@ -28,7 +28,7 @@ func ProcessDirectory(req contract.TreeRequest, dir string, resp *contract.TreeR
 	}
 	entries, _ := os.ReadDir(root.Path)
 	if len(entries) > 0 {
-		resp.DirectoryCount, resp.FileCount = ReadDirectory(&root)
+		resp.DirectoryCount, resp.FileCount = ReadDirectory(&root, 0, req.Flags.Levels)
 		// adding the current directory count if it contains even a single directory
 		if req.Flags.DirectoryPrint {
 			for _, entry := range entries {
@@ -45,10 +45,12 @@ func ProcessDirectory(req contract.TreeRequest, dir string, resp *contract.TreeR
 }
 
 func ReadDirectory(
-	root *contract.TreeNode) (int, int) {
+	root *contract.TreeNode,
+	currLevel int,
+	maxLevel int) (int, int) {
 	var dCount, fCount int
 	entries, err := os.ReadDir(root.Path)
-	if err != nil {
+	if err != nil || currLevel >= maxLevel {
 		return dCount, fCount
 	}
 
@@ -65,7 +67,7 @@ func ReadDirectory(
 				RelativePath: relativePath,
 			}
 			nextDir = append(nextDir, nextNode)
-			nextDCount, nextFCount := ReadDirectory(nextNode)
+			nextDCount, nextFCount := ReadDirectory(nextNode, currLevel+1, maxLevel)
 			dCount += nextDCount
 			fCount += nextFCount
 		} else {

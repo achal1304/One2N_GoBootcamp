@@ -29,6 +29,7 @@ func TestProcessDirectory(t *testing.T) {
 			filesData: []string{""},
 			req: contract.TreeRequest{
 				FolderName: "dir1",
+				Flags:      contract.TreeFlags{Levels: contract.MaxLevel},
 			},
 			expectedResp: &contract.TreeNode{
 				Name:         "dir1",
@@ -57,7 +58,7 @@ func TestProcessDirectory(t *testing.T) {
 			filesData: []string{""},
 			req: contract.TreeRequest{
 				FolderName: "dir1",
-				Flags:      contract.TreeFlags{DirectoryPrint: true},
+				Flags:      contract.TreeFlags{DirectoryPrint: true, Levels: contract.MaxLevel},
 			},
 			expectedResp: &contract.TreeNode{
 				Name:         "dir1",
@@ -85,7 +86,7 @@ func TestProcessDirectory(t *testing.T) {
 			filesData: []string{""},
 			req: contract.TreeRequest{
 				FolderName: "dir1",
-				Flags:      contract.TreeFlags{DirectoryPrint: true},
+				Flags:      contract.TreeFlags{DirectoryPrint: true, Levels: contract.MaxLevel},
 			},
 			expectedResp: &contract.TreeNode{
 				Name:         "dir1",
@@ -137,6 +138,7 @@ func TestReadDirectory(t *testing.T) {
 		errorResonse   string
 		expfolderCount int
 		expfileCount   int
+		maxLevel       int
 		prepareDir     func(dirName string, fileNames []string, data []string) error
 	}{
 		{
@@ -173,6 +175,7 @@ func TestReadDirectory(t *testing.T) {
 			prepareDir:     DirCreator,
 			expfolderCount: 1,
 			expfileCount:   1,
+			maxLevel:       10,
 		},
 		{
 			name:      "Folder Not Present",
@@ -194,6 +197,43 @@ func TestReadDirectory(t *testing.T) {
 			prepareDir:     DirCreator,
 			expfolderCount: 0,
 			expfileCount:   0,
+			maxLevel:       10,
+		},
+		{
+			name: "Happy Path Folder With Nested Levels",
+			// creating test3.txt inside test1 directory which will be at nestedlevel 2 and should not be in resp
+			fileNames: []string{"test1", "test2.txt", "test1/test3.txt"},
+			filesData: []string{"", "", ""},
+			req: &contract.TreeNode{
+				Name:         "dir1",
+				Path:         "dir1",
+				RelativePath: "dir1",
+				IsDir:        true,
+			},
+			expectedResp: &contract.TreeNode{
+				Name:         "dir1",
+				IsDir:        true,
+				RelativePath: "dir1",
+				Path:         "dir1",
+				NextDir: []*contract.TreeNode{
+					{
+						Name:         "test1",
+						IsDir:        true,
+						Path:         filepath.Join("dir1", "test1"),
+						RelativePath: "dir1/test1",
+					},
+					{
+						Name:         "test2.txt",
+						IsDir:        false,
+						Path:         filepath.Join("dir1", "test2.txt"),
+						RelativePath: "dir1/test2.txt",
+					},
+				},
+			},
+			prepareDir:     DirCreator,
+			expfolderCount: 1,
+			expfileCount:   1,
+			maxLevel:       1,
 		},
 	}
 
@@ -207,7 +247,7 @@ func TestReadDirectory(t *testing.T) {
 				_ = os.RemoveAll(tt.expectedResp.Name)
 			}()
 
-			actualDCount, actualFCount := ReadDirectory(tt.req)
+			actualDCount, actualFCount := ReadDirectory(tt.req, 0, tt.maxLevel)
 
 			assert.Equal(t, tt.expectedResp, tt.req)
 			assert.Equal(t, tt.expfolderCount, actualDCount)
