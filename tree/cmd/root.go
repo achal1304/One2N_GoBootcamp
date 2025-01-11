@@ -4,6 +4,7 @@ Copyright © 2025 NAME HERE <EMAIL ADDRESS>
 package cmd
 
 import (
+	"errors"
 	"os"
 
 	"github.com/achal1304/One2N_GoBootcamp/tree/contract"
@@ -23,6 +24,12 @@ var rootCmd = &cobra.Command{
 		if len(args) > 0 {
 			req.FolderName = args[0]
 		}
+
+		if TreeFlags.Levels <= 0 {
+			handler.PrintStdOut(os.Stderr, errors.New("tree: Invalid level, must be greater than 0.").Error())
+			os.Exit(1)
+		}
+
 		resp, err := handler.ProcessTreeRequest(req)
 		if err != nil {
 			handler.PrintStdOut(os.Stderr, err.Error())
@@ -49,4 +56,5 @@ func init() {
 	TreeFlags = contract.TreeFlags{}
 	rootCmd.Flags().BoolVarP(&TreeFlags.RelativePath, "relativePath", "f", false, "print relative path")
 	rootCmd.Flags().BoolVarP(&TreeFlags.DirectoryPrint, "printDirectories", "d", false, "print directories only")
+	rootCmd.Flags().IntVarP(&TreeFlags.Levels, "nestedLevels", "L", contract.MaxLevel, "print nested levels only")
 }

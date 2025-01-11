@@ -24,6 +24,7 @@ func TestProcessTreeRequest(t *testing.T) {
 			name: "Happy Path with FolderName Provided",
 			req: contract.TreeRequest{
 				FolderName: "testDir",
+				Flags:      contract.TreeFlags{Levels: contract.MaxLevel},
 			},
 			fileNames: []string{"subDir"},
 			filesData: []string{""},
