@@ -58,5 +58,7 @@ func init() {
 	rootCmd.Flags().BoolVarP(&TreeFlags.DirectoryPrint, "printDirectories", "d", false, "print directories only")
 	rootCmd.Flags().BoolVarP(&TreeFlags.Permission, "permission", "p", false, "print permissions")
 	rootCmd.Flags().BoolVarP(&TreeFlags.RecentlyModified, "recentlyModified", "t", false, "print recently modified first")
+	rootCmd.Flags().BoolVarP(&TreeFlags.XmlOutput, "xmlOutput", "X", false, "print xml output")
+	rootCmd.Flags().BoolVarP(&TreeFlags.JsonOutput, "jsonOutput", "J", false, "print json output")
 	rootCmd.Flags().IntVarP(&TreeFlags.Levels, "nestedLevels", "L", contract.MaxLevel, "print nested levels only")
 }
