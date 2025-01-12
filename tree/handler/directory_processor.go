@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"sort"
 
 	"github.com/achal1304/One2N_GoBootcamp/tree/contract"
 	"github.com/achal1304/One2N_GoBootcamp/tree/utils"
@@ -36,7 +37,7 @@ func ProcessDirectory(req contract.TreeRequest, dir string, resp *contract.TreeR
 	entries, _ := os.ReadDir(root.Path)
 	root.Permission = utils.GetPermissionString(info.Mode())
 	if len(entries) > 0 {
-		resp.DirectoryCount, resp.FileCount = ReadDirectory(&root, 0, req.Flags.Levels)
+		resp.DirectoryCount, resp.FileCount = ReadDirectory(&root, 0, req)
 		// adding the current directory count if it contains even a single directory
 		if req.Flags.DirectoryPrint {
 			for _, entry := range entries {
@@ -55,11 +56,25 @@ func ProcessDirectory(req contract.TreeRequest, dir string, resp *contract.TreeR
 func ReadDirectory(
 	root *contract.TreeNode,
 	currLevel int,
-	maxLevel int) (int, int) {
+	req contract.TreeRequest) (int, int) {
 	var dCount, fCount int
 	entries, err := os.ReadDir(root.Path)
-	if err != nil || currLevel >= maxLevel {
+	if err != nil || currLevel >= req.Flags.Levels {
 		return dCount, fCount
+	}
+
+	if req.Flags.RecentlyModified {
+		sort.Slice(entries, func(i, j int) bool {
+			infoI, err := entries[i].Info()
+			if err != nil {
+				PrintStdOut(os.Stderr, fmt.Sprintf("tree: error while reading %s", infoI.Name()))
+			}
+			infoJ, err := entries[j].Info()
+			if err != nil {
+				PrintStdOut(os.Stderr, fmt.Sprintf("tree: error while reading %s", infoJ.Name()))
+			}
+			return infoI.ModTime().Before(infoJ.ModTime())
+		})
 	}
 
 	nextDir := []*contract.TreeNode{}
@@ -84,7 +99,7 @@ func ReadDirectory(
 				RelativePath: relativePath,
 			}
 			nextDir = append(nextDir, nextNode)
-			nextDCount, nextFCount := ReadDirectory(nextNode, currLevel+1, maxLevel)
+			nextDCount, nextFCount := ReadDirectory(nextNode, currLevel+1, req)
 			dCount += nextDCount
 			fCount += nextFCount
 		} else {
