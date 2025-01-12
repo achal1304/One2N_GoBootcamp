@@ -102,7 +102,7 @@ func ReadDirectory(
 			nextDCount, nextFCount := ReadDirectory(nextNode, currLevel+1, req)
 			dCount += nextDCount
 			fCount += nextFCount
-		} else {
+		} else if !entry.IsDir() && !req.Flags.DirectoryPrint {
 			fCount++
 			nextNode := &contract.TreeNode{
 				Name:         entry.Name(),

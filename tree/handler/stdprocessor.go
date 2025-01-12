@@ -3,6 +3,7 @@ package handler
 import (
 	"fmt"
 	"io"
+	"os"
 
 	"github.com/achal1304/One2N_GoBootcamp/tree/contract"
 )
@@ -10,6 +11,12 @@ import (
 func PrintResponse(writer io.Writer, req contract.TreeRequest, response contract.TreeResponse) {
 	if req.Flags.XmlOutput {
 		WriteXML(writer, req, response)
+	} else if req.Flags.JsonOutput {
+		err := WriteJSON(writer, req, response)
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "Error writing JSON: %v\n", err)
+			os.Exit(1)
+		}
 	} else {
 		WritePlainText(writer, req, response)
 	}
@@ -35,10 +42,6 @@ func PrintTree(writer io.Writer, req contract.TreeRequest, response *contract.Tr
 	}
 	iteration++
 	for i, node := range response.NextDir {
-		if req.Flags.DirectoryPrint && !node.IsDir {
-			continue
-		}
-
 		if node.IsDir && i < len(response.NextDir)-1 {
 			PrintStdOut(writer, getPrinter(req, node, printer, "|-- "))
 			PrintTree(writer, req, node, iteration, printer+"|   ")

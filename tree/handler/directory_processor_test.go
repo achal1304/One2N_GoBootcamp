@@ -68,15 +68,7 @@ func TestProcessDirectory(t *testing.T) {
 				RelativePath: "dir1",
 				Path:         "dir1",
 				Permission:   "[drwxrwxrwx]",
-				NextDir: []*contract.TreeNode{
-					{
-						Name:         "test1.txt",
-						IsDir:        false,
-						Path:         filepath.Join("dir1", "test1.txt"),
-						RelativePath: "dir1/test1.txt",
-						Permission:   "[-rw-rw-rw-]",
-					},
-				},
+				NextDir:      []*contract.TreeNode{},
 			},
 			expectedTreeResp: &contract.TreeResponse{
 				DirectoryCount: 0,
