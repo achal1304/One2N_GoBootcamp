@@ -6,6 +6,7 @@ type TreeFlags struct {
 	Permission       bool
 	Levels           int
 	RecentlyModified bool
+	XmlOutput        bool
 }
 
 const MaxLevel = 999999999

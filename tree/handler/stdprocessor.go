@@ -8,6 +8,14 @@ import (
 )
 
 func PrintResponse(writer io.Writer, req contract.TreeRequest, response contract.TreeResponse) {
+	if req.Flags.XmlOutput {
+		WriteXML(writer, req, response)
+	} else {
+		WritePlainText(writer, req, response)
+	}
+}
+
+func WritePlainText(writer io.Writer, req contract.TreeRequest, response contract.TreeResponse) {
 	root := response.Root
 	var finalCount string
 	PrintStdOut(writer, getPrinter(req, root, "", ""))
