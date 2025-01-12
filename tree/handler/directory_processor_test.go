@@ -144,7 +144,7 @@ func TestReadDirectory(t *testing.T) {
 		errorResonse   string
 		expfolderCount int
 		expfileCount   int
-		maxLevel       int
+		reqWithFlags   contract.TreeRequest
 		prepareDir     func(dirName string, fileNames []string, data []string) error
 	}{
 		{
@@ -185,7 +185,7 @@ func TestReadDirectory(t *testing.T) {
 			prepareDir:     DirCreator,
 			expfolderCount: 1,
 			expfileCount:   1,
-			maxLevel:       10,
+			reqWithFlags:   contract.TreeRequest{Flags: contract.TreeFlags{Levels: 10}},
 		},
 		{
 			name:      "Folder Not Present",
@@ -209,7 +209,7 @@ func TestReadDirectory(t *testing.T) {
 			prepareDir:     DirCreator,
 			expfolderCount: 0,
 			expfileCount:   0,
-			maxLevel:       10,
+			reqWithFlags:   contract.TreeRequest{Flags: contract.TreeFlags{Levels: 10}},
 		},
 		{
 			name: "Happy Path Folder With Nested Levels",
@@ -249,7 +249,7 @@ func TestReadDirectory(t *testing.T) {
 			prepareDir:     DirCreator,
 			expfolderCount: 1,
 			expfileCount:   1,
-			maxLevel:       1,
+			reqWithFlags:   contract.TreeRequest{Flags: contract.TreeFlags{Levels: 1}},
 		},
 	}
 
@@ -263,7 +263,7 @@ func TestReadDirectory(t *testing.T) {
 				_ = os.RemoveAll(tt.expectedResp.Name)
 			}()
 
-			actualDCount, actualFCount := ReadDirectory(tt.req, 0, tt.maxLevel)
+			actualDCount, actualFCount := ReadDirectory(tt.req, 0, tt.reqWithFlags)
 
 			assert.Equal(t, tt.expectedResp, tt.req)
 			assert.Equal(t, tt.expfolderCount, actualDCount)

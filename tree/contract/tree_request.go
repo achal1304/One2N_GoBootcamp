@@ -1,10 +1,11 @@
 package contract
 
 type TreeFlags struct {
-	RelativePath   bool
-	DirectoryPrint bool
-	Permission     bool
-	Levels         int
+	RelativePath     bool
+	DirectoryPrint   bool
+	Permission       bool
+	Levels           int
+	RecentlyModified bool
 }
 
 const MaxLevel = 999999999
