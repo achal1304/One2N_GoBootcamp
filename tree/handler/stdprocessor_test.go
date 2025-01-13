@@ -8,7 +8,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestPrintResponseStdOut(t *testing.T) {
+func TestWritePlainText(t *testing.T) {
 	tests := []struct {
 		name           string
 		response       contract.TreeResponse
@@ -228,7 +228,7 @@ func TestPrintResponseStdOut(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			// Capture output
 			var output bytes.Buffer
-			PrintResponse(&output, tt.req, tt.response)
+			WritePlainText(&output, tt.req, tt.response)
 
 			// Validate output
 			assert.Equal(t, tt.expectedOutput, output.String())
