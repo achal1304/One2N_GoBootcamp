@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"os"
 
 	"github.com/achal1304/One2N_GoBootcamp/tree/contract"
 )
@@ -18,7 +17,7 @@ type JSONNode struct {
 type Report struct {
 	Type        string `json:"type"`
 	Directories int    `json:"directories"`
-	Files       int    `json:"files,omitempty"`
+	Files       *int   `json:"files,omitempty"`
 }
 
 // WriteJSON generates the JSON output for the tree and writes it to the provided writer
@@ -30,9 +29,8 @@ func WriteJSON(writer io.Writer, req contract.TreeRequest, response contract.Tre
 	}
 
 	if !req.Flags.DirectoryPrint {
-		reportJSON.Files = response.FileCount
+		reportJSON.Files = &response.FileCount
 	}
-
 	// Combine tree and report
 	output := []interface{}{treeJSON, reportJSON}
 
@@ -60,9 +58,4 @@ func buildJSONTree(node *contract.TreeNode) JSONNode {
 	}
 
 	return jsonNode
-}
-
-// Log errors to stderr
-func logError(message string, err error) {
-	fmt.Fprintln(os.Stderr, fmt.Sprintf("Error: %s: %v", message, err))
 }

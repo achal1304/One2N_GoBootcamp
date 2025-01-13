@@ -7,6 +7,7 @@ import (
 	"path/filepath"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/achal1304/One2N_GoBootcamp/tree/contract"
 	"github.com/stretchr/testify/assert"
@@ -322,6 +323,7 @@ func DirCreator(dirName string, fileNames []string, data []string) error {
 	}
 
 	for i, fileName := range fileNames {
+		time.Sleep(1)
 		if strings.Contains(fileName, "txt") {
 			_ = os.WriteFile(filepath.Join(dirName, fileName), []byte(data[i]), 0644)
 		} else {
