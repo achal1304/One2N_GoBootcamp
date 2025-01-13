@@ -25,8 +25,3 @@ func CheckDirectory(dir string) bool {
 	}
 	return true
 }
-
-// Converts file mode to a permission string like "rw-r--r--"
-func GetPermissionString(mode os.FileMode) string {
-	return "[" + mode.String() + "]"
-}

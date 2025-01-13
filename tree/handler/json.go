@@ -11,6 +11,8 @@ import (
 type JSONNode struct {
 	Type     string     `json:"type"`
 	Name     string     `json:"name"`
+	Mode     string     `json:"mode,omitempty"`
+	Prot     string     `json:"prot,omitempty"`
 	Contents []JSONNode `json:"contents,omitempty"`
 }
 
@@ -22,7 +24,7 @@ type Report struct {
 
 // WriteJSON generates the JSON output for the tree and writes it to the provided writer
 func WriteJSON(writer io.Writer, req contract.TreeRequest, response contract.TreeResponse) error {
-	treeJSON := buildJSONTree(response.Root)
+	treeJSON := buildJSONTree(req, response.Root)
 	reportJSON := Report{
 		Type:        "report",
 		Directories: response.DirectoryCount,
@@ -44,7 +46,7 @@ func WriteJSON(writer io.Writer, req contract.TreeRequest, response contract.Tre
 	return nil
 }
 
-func buildJSONTree(node *contract.TreeNode) JSONNode {
+func buildJSONTree(req contract.TreeRequest, node *contract.TreeNode) JSONNode {
 	jsonNode := JSONNode{
 		Type: "file",
 		Name: node.Name,
@@ -53,8 +55,13 @@ func buildJSONTree(node *contract.TreeNode) JSONNode {
 	if node.IsDir {
 		jsonNode.Type = "directory"
 		for _, child := range node.NextDir {
-			jsonNode.Contents = append(jsonNode.Contents, buildJSONTree(child))
+			jsonNode.Contents = append(jsonNode.Contents, buildJSONTree(req, child))
 		}
+	}
+
+	if req.Flags.Permission {
+		jsonNode.Mode = node.PermissionOctal
+		jsonNode.Prot = node.Permission
 	}
 
 	return jsonNode

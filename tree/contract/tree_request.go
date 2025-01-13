@@ -24,10 +24,11 @@ type TreeResponse struct {
 }
 
 type TreeNode struct {
-	Name         string
-	Path         string
-	IsDir        bool
-	RelativePath string
-	Permission   string
-	NextDir      []*TreeNode
+	Name            string
+	Path            string
+	IsDir           bool
+	RelativePath    string
+	Permission      string
+	PermissionOctal string
+	NextDir         []*TreeNode
 }
