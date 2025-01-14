@@ -40,26 +40,6 @@ func WritePlainText(writer io.Writer, req contract.TreeRequest, response contrac
 	PrintStdOut(writer, finalCount)
 }
 
-// func PrintTree(writer io.Writer, req contract.TreeRequest, response *contract.TreeNode, iteration int, printer string) {
-// 	if response == nil {
-// 		return
-// 	}
-// 	iteration++
-// 	for i, node := range response.NextDir {
-// 		if node.IsDir && i < len(response.NextDir)-1 {
-// 			PrintStdOut(writer, getPrinter(req, node, printer, "|-- "))
-// 			PrintTree(writer, req, node, iteration, printer+"|   ")
-// 		} else if node.IsDir && i >= len(response.NextDir)-1 {
-// 			PrintStdOut(writer, getPrinter(req, node, printer, "|-- "))
-// 			PrintTree(writer, req, node, iteration, printer+"    ")
-// 		}
-// 		if !node.IsDir {
-// 			PrintStdOut(writer, getPrinter(req, node, printer, "|-- "))
-// 		}
-// 	}
-// 	return
-// }
-
 func PrintTree(writer io.Writer, req contract.TreeRequest, response *contract.TreeNode, iteration int, printer string) {
 	if response == nil {
 		return
