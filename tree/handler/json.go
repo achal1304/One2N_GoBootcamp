@@ -37,7 +37,10 @@ func WriteJSON(writer io.Writer, req contract.TreeRequest, response contract.Tre
 	output := []interface{}{treeJSON, reportJSON}
 
 	encoder := json.NewEncoder(writer)
-	encoder.SetIndent("", "  ")
+
+	if !req.Flags.Graphics {
+		encoder.SetIndent("", "  ")
+	}
 
 	if err := encoder.Encode(output); err != nil {
 		return fmt.Errorf("error writing JSON: %v", err)

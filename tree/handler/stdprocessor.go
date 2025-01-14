@@ -26,7 +26,11 @@ func WritePlainText(writer io.Writer, req contract.TreeRequest, response contrac
 	root := response.Root
 	var finalCount string
 	PrintStdOut(writer, getPrinter(req, root, "", ""))
-	PrintTree(writer, req, root, 0, fmt.Sprint(""))
+	if !req.Flags.Graphics {
+		PrintTree(writer, req, root, 0, "")
+	} else {
+		PrintTreeWithoutGraphics(writer, req, root, "")
+	}
 
 	if req.Flags.DirectoryPrint {
 		finalCount = fmt.Sprintf("\n%d directories", response.DirectoryCount)
@@ -41,19 +45,31 @@ func PrintTree(writer io.Writer, req contract.TreeRequest, response *contract.Tr
 		return
 	}
 	iteration++
+
 	for i, node := range response.NextDir {
-		if node.IsDir && i < len(response.NextDir)-1 {
-			PrintStdOut(writer, getPrinter(req, node, printer, "|-- "))
-			PrintTree(writer, req, node, iteration, printer+"|   ")
-		} else if node.IsDir && i >= len(response.NextDir)-1 {
-			PrintStdOut(writer, getPrinter(req, node, printer, "|-- "))
-			PrintTree(writer, req, node, iteration, printer+"    ")
+		graphicPrefix := "|-- "
+		nextGraphicPrefix := "|   "
+		if i >= len(response.NextDir)-1 {
+			nextGraphicPrefix = "    "
 		}
-		if !node.IsDir {
-			PrintStdOut(writer, getPrinter(req, node, printer, "|-- "))
+		PrintStdOut(writer, getPrinter(req, node, printer, graphicPrefix))
+		if node.IsDir {
+			PrintTree(writer, req, node, iteration, printer+nextGraphicPrefix)
 		}
 	}
-	return
+}
+
+func PrintTreeWithoutGraphics(writer io.Writer, req contract.TreeRequest, response *contract.TreeNode, printer string) {
+	if response == nil {
+		return
+	}
+
+	for _, node := range response.NextDir {
+		PrintStdOut(writer, getPrinter(req, node, printer, ""))
+		if node.IsDir {
+			PrintTreeWithoutGraphics(writer, req, node, printer)
+		}
+	}
 }
 
 func PrintStdOut(writer io.Writer, text string) {

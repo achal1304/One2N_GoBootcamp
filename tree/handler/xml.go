@@ -11,7 +11,9 @@ import (
 
 func WriteXML(writer io.Writer, req contract.TreeRequest, response contract.TreeResponse) {
 	encoder := xml.NewEncoder(writer)
-	encoder.Indent("", "  ") // Pretty print
+	if !req.Flags.Graphics {
+		encoder.Indent("", "  ") // Pretty print
+	}
 
 	fmt.Fprint(writer, xml.Header)
 

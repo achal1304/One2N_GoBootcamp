@@ -8,6 +8,106 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+func TestPrintResponse(t *testing.T) {
+	tests := []struct {
+		name           string
+		req            contract.TreeRequest
+		response       contract.TreeResponse
+		expectedOutput string
+	}{
+		{
+			name: "JSON Output",
+			req: contract.TreeRequest{
+				Flags: contract.TreeFlags{JsonOutput: true},
+			},
+			response: contract.TreeResponse{
+				Root: &contract.TreeNode{
+					Name:  "root",
+					IsDir: true,
+					NextDir: []*contract.TreeNode{
+						{Name: "file1.txt", IsDir: false},
+					},
+				},
+				DirectoryCount: 1,
+				FileCount:      1,
+			},
+			expectedOutput: `[
+  {
+    "type": "directory",
+    "name": "root",
+    "contents": [
+      {
+        "type": "file",
+        "name": "file1.txt"
+      }
+    ]
+  },
+  {
+    "type": "report",
+    "directories": 1,
+    "files": 1
+  }
+]
+`,
+		},
+		{
+			name: "Plain Text Output",
+			req:  contract.TreeRequest{},
+			response: contract.TreeResponse{
+				Root: &contract.TreeNode{
+					Name:  "root",
+					IsDir: true,
+					NextDir: []*contract.TreeNode{
+						{Name: "file1.txt", IsDir: false},
+					},
+				},
+				DirectoryCount: 1,
+				FileCount:      1,
+			},
+			expectedOutput: `root
+|-- file1.txt
+
+1 directories, 1 files
+`,
+		},
+		{
+			name: "XML Output",
+			req:  contract.TreeRequest{Flags: contract.TreeFlags{XmlOutput: true}},
+			response: contract.TreeResponse{
+				Root: &contract.TreeNode{
+					Name:  "root",
+					IsDir: true,
+					NextDir: []*contract.TreeNode{
+						{Name: "file1.txt", IsDir: false},
+					},
+				},
+				DirectoryCount: 1,
+				FileCount:      1,
+			},
+			expectedOutput: `<?xml version="1.0" encoding="UTF-8"?>
+<tree>
+  <directory name="root">
+    <file name="file1.txt"></file>
+  </directory>
+  <report>
+    <directories>1</directories>
+    <files>1</files>
+  </report>
+</tree>`,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			var output bytes.Buffer
+
+			PrintResponse(&output, tt.req, tt.response)
+
+			assert.Equal(t, tt.expectedOutput, output.String())
+		})
+	}
+}
+
 func TestWritePlainText(t *testing.T) {
 	tests := []struct {
 		name           string
@@ -218,6 +318,44 @@ func TestWritePlainText(t *testing.T) {
 			expectedOutput: `testDir
 |-- subDir
 |-- file1.txt
+
+2 directories, 1 files
+`,
+		},
+		{
+			name: "Permission Print With Relative Path With Graphics Option",
+			response: contract.TreeResponse{
+				Root: &contract.TreeNode{
+					Name:         "testDir",
+					IsDir:        true,
+					Path:         "testDir",
+					RelativePath: "testDir",
+					Permission:   "drwxrwxrwx",
+					NextDir: []*contract.TreeNode{
+						{
+							Name:         "subDir",
+							IsDir:        true,
+							Path:         "testDir/subDir",
+							RelativePath: "testDir/subDir",
+							Permission:   "drwxrwxrwx",
+						},
+						{
+							Name:         "file1.txt",
+							IsDir:        false,
+							Path:         "testDir/file1.txt",
+							RelativePath: "testDir/file1.txt",
+							Permission:   "-rw-rw-rw-",
+						},
+					},
+				},
+				DirectoryCount: 2,
+				FileCount:      1,
+			},
+			req: contract.TreeRequest{Flags: contract.TreeFlags{Permission: true, RelativePath: true,
+				Graphics: true}},
+			expectedOutput: `[drwxrwxrwx] testDir
+[drwxrwxrwx] testDir/subDir
+[-rw-rw-rw-] testDir/file1.txt
 
 2 directories, 1 files
 `,

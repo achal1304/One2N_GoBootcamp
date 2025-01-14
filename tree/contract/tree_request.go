@@ -8,6 +8,7 @@ type TreeFlags struct {
 	RecentlyModified bool
 	XmlOutput        bool
 	JsonOutput       bool
+	Graphics         bool
 }
 
 const MaxLevel = 999999999

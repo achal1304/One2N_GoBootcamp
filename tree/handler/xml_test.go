@@ -170,3 +170,44 @@ func TestWriteXMLPermissionAndRelativePath(t *testing.T) {
 		t.Errorf("Expected:\n%s\nBut got:\n%s", expected, output)
 	}
 }
+
+func TestWriteXMLPermissionAndRelativePathAndGraphicsOption(t *testing.T) {
+	tree := &contract.TreeNode{
+		Name:            "root",
+		IsDir:           true,
+		Permission:      "drwxrwxrwx",
+		PermissionOctal: "0777",
+		RelativePath:    "root",
+		NextDir: []*contract.TreeNode{
+			{Name: "file1.txt", IsDir: false, Permission: "-rw-rw-rw", PermissionOctal: "0666",
+				RelativePath: "root/file1.txt",
+			},
+		},
+	}
+
+	req := contract.TreeRequest{
+		Flags: contract.TreeFlags{
+			DirectoryPrint: false,
+			Permission:     true,
+			RelativePath:   true,
+			Graphics:       true,
+		},
+	}
+
+	resp := contract.TreeResponse{
+		Root:           tree,
+		DirectoryCount: 1,
+		FileCount:      1,
+	}
+
+	var buf bytes.Buffer
+	WriteXML(&buf, req, resp)
+
+	expected := `<?xml version="1.0" encoding="UTF-8"?>
+<tree><directory name="root" mode="0777" prot="drwxrwxrwx"><file name="root/file1.txt" mode="0666" prot="-rw-rw-rw"></file></directory><report><directories>1</directories><files>1</files></report></tree>`
+
+	output := buf.String()
+	if output != expected {
+		t.Errorf("Expected:\n%s\nBut got:\n%s", expected, output)
+	}
+}
