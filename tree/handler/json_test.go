@@ -167,6 +167,47 @@ func TestWriteJSON(t *testing.T) {
 				},
 			},
 		},
+		{
+			name: "Permission And Relative Path Flag",
+			req:  contract.TreeRequest{Flags: contract.TreeFlags{RelativePath: true, Permission: true}},
+			response: contract.TreeResponse{
+				Root: &contract.TreeNode{
+					Name:            "root",
+					IsDir:           true,
+					Permission:      "drwxrwxrwx",
+					PermissionOctal: "0777",
+					RelativePath:    "root",
+					NextDir: []*contract.TreeNode{
+						{Name: "file1.txt", IsDir: false, Permission: "-rw-rw-rw", PermissionOctal: "0666",
+							RelativePath: "root/file1.txt",
+						},
+					},
+				},
+				DirectoryCount: 1,
+				FileCount:      1,
+			},
+			expectedOutput: []interface{}{
+				map[string]interface{}{
+					"type": "directory",
+					"mode": "0777",
+					"prot": "drwxrwxrwx",
+					"name": "root",
+					"contents": []interface{}{
+						map[string]interface{}{
+							"type": "file",
+							"mode": "0666",
+							"prot": "-rw-rw-rw",
+							"name": "root/file1.txt",
+						},
+					},
+				},
+				map[string]interface{}{
+					"type":        "report",
+					"directories": float64(1),
+					"files":       float64(1),
+				},
+			},
+		},
 	}
 
 	for _, tt := range tests {

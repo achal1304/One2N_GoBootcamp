@@ -67,9 +67,9 @@ func getPrinter(req contract.TreeRequest, node *contract.TreeNode, printer strin
 	} else if req.Flags.RelativePath && !req.Flags.Permission {
 		newPrinter = printer + seperator + node.RelativePath
 	} else if !req.Flags.RelativePath && req.Flags.Permission {
-		newPrinter = printer + seperator + node.Permission + " " + node.Name
+		newPrinter = printer + seperator + "[" + node.Permission + "]" + " " + node.Name
 	} else {
-		newPrinter = printer + seperator + node.Permission + " " + node.RelativePath
+		newPrinter = printer + seperator + "[" + node.Permission + "]" + " " + node.RelativePath
 	}
 	return newPrinter
 }

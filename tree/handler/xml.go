@@ -21,7 +21,7 @@ func WriteXML(writer io.Writer, req contract.TreeRequest, response contract.Tree
 	}
 
 	// Print the directory and file structure
-	if err := PrintXMLTree(response.Root, encoder); err != nil {
+	if err := PrintXMLTree(req, response.Root, encoder); err != nil {
 		logXMLError("Error writing XML tree", err)
 		return
 	}
@@ -43,18 +43,18 @@ func WriteXML(writer io.Writer, req contract.TreeRequest, response contract.Tree
 	}
 }
 
-func PrintXMLTree(node *contract.TreeNode, encoder *xml.Encoder) error {
+func PrintXMLTree(req contract.TreeRequest, node *contract.TreeNode, encoder *xml.Encoder) error {
 	tagName := "file"
 	if node.IsDir {
 		tagName = "directory"
 	}
 
-	if err := startElementWithAttr(encoder, tagName, "name", node.Name); err != nil {
+	if err := startElementWithAttr(req, encoder, tagName, "name", node); err != nil {
 		return err
 	}
 
 	for _, child := range node.NextDir {
-		if err := PrintXMLTree(child, encoder); err != nil {
+		if err := PrintXMLTree(req, child, encoder); err != nil {
 			return err
 		}
 	}
@@ -90,13 +90,26 @@ func endElement(encoder *xml.Encoder, name string) error {
 	return encoder.EncodeToken(xml.EndElement{Name: xml.Name{Local: name}})
 }
 
-func startElementWithAttr(encoder *xml.Encoder, name, attrKey, attrValue string) error {
+func startElementWithAttr(req contract.TreeRequest, encoder *xml.Encoder, name, attrKey string, node *contract.TreeNode) error {
+	nameValue := node.Name
+	if req.Flags.RelativePath {
+		nameValue = node.RelativePath
+	}
+
 	elem := xml.StartElement{
 		Name: xml.Name{Local: name},
 		Attr: []xml.Attr{
-			{Name: xml.Name{Local: attrKey}, Value: attrValue},
+			{Name: xml.Name{Local: attrKey}, Value: nameValue},
 		},
 	}
+
+	if req.Flags.Permission {
+		elem.Attr = append(elem.Attr, []xml.Attr{
+			{Name: xml.Name{Local: "mode"}, Value: node.PermissionOctal},
+			{Name: xml.Name{Local: "prot"}, Value: node.Permission},
+		}...)
+	}
+
 	return encoder.EncodeToken(elem)
 }
 
