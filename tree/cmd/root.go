@@ -18,6 +18,9 @@ var TreeFlags contract.TreeFlags
 var rootCmd = &cobra.Command{
 	Use:   "tree",
 	Short: "print directory structures in tree format",
+	PersistentPreRun: func(cmd *cobra.Command, args []string) {
+		handleCombinedFlags(cmd)
+	},
 	RunE: func(cmd *cobra.Command, args []string) error {
 		var req contract.TreeRequest
 		req.Flags = TreeFlags
@@ -60,5 +63,22 @@ func init() {
 	rootCmd.Flags().BoolVarP(&TreeFlags.RecentlyModified, "recentlyModified", "t", false, "print recently modified first")
 	rootCmd.Flags().BoolVarP(&TreeFlags.XmlOutput, "xmlOutput", "X", false, "print xml output")
 	rootCmd.Flags().BoolVarP(&TreeFlags.JsonOutput, "jsonOutput", "J", false, "print json output")
+	rootCmd.Flags().BoolVarP(&TreeFlags.Graphics, "graphicsOption", "i", false, "print without indentation")
 	rootCmd.Flags().IntVarP(&TreeFlags.Levels, "nestedLevels", "L", contract.MaxLevel, "print nested levels only")
+}
+
+func handleCombinedFlags(cmd *cobra.Command) {
+	for _, arg := range os.Args {
+		if len(arg) > 2 && arg[0] == '-' && arg[1] != '-' {
+			// Loop through combined flags (e.g., -if)
+			for _, flag := range arg[1:] {
+				switch flag {
+				case 'i':
+					_ = cmd.Flags().Set("graphicsOption", "true")
+				case 'f':
+					_ = cmd.Flags().Set("relativePath", "true")
+				}
+			}
+		}
+	}
 }
