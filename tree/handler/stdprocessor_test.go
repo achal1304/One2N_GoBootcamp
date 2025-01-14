@@ -322,6 +322,44 @@ func TestWritePlainText(t *testing.T) {
 2 directories, 1 files
 `,
 		},
+		{
+			name: "Permission Print With Relative Path With Graphics Option",
+			response: contract.TreeResponse{
+				Root: &contract.TreeNode{
+					Name:         "testDir",
+					IsDir:        true,
+					Path:         "testDir",
+					RelativePath: "testDir",
+					Permission:   "drwxrwxrwx",
+					NextDir: []*contract.TreeNode{
+						{
+							Name:         "subDir",
+							IsDir:        true,
+							Path:         "testDir/subDir",
+							RelativePath: "testDir/subDir",
+							Permission:   "drwxrwxrwx",
+						},
+						{
+							Name:         "file1.txt",
+							IsDir:        false,
+							Path:         "testDir/file1.txt",
+							RelativePath: "testDir/file1.txt",
+							Permission:   "-rw-rw-rw-",
+						},
+					},
+				},
+				DirectoryCount: 2,
+				FileCount:      1,
+			},
+			req: contract.TreeRequest{Flags: contract.TreeFlags{Permission: true, RelativePath: true,
+				Graphics: true}},
+			expectedOutput: `[drwxrwxrwx] testDir
+[drwxrwxrwx] testDir/subDir
+[-rw-rw-rw-] testDir/file1.txt
+
+2 directories, 1 files
+`,
+		},
 	}
 
 	for _, tt := range tests {
