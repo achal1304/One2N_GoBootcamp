@@ -64,5 +64,9 @@ func buildJSONTree(req contract.TreeRequest, node *contract.TreeNode) JSONNode {
 		jsonNode.Prot = node.Permission
 	}
 
+	if req.Flags.RelativePath {
+		jsonNode.Name = node.RelativePath
+	}
+
 	return jsonNode
 }
